@@ -29,19 +29,36 @@ Ajoutez les configurations en suivant le fichier .env.example
 make up
 ```
 
+## Utilisation de Air
+
+Air est un outil de rechargement à chaud qui permet de recompiler et redémarrer automatiquement votre application Go lorsque des changements sont détectés dans le code source. Cela améliore le flux de travail en développement.
+
+### 1. Démarrage de Air
+
+Air est automatiquement démarré lorsque vous lancez la commande make up ou docker-compose up. Il surveille les fichiers de votre projet pour tout changement et les compile automatiquement.
+
+### 2. Vérification des Logs de Compilation
+
+Pour voir les informations de compilation, les erreurs, et les autres logs produits par Air, vous pouvez utiliser la commande suivante :
+
+```bash
+docker-compose logs -f app
+```
+Cette commande vous permet de suivre en temps réel les logs du conteneur app, où Air est exécuté.
+
 ## Ajouter de nouvelles dépendances
 
-## 	1.	Importer la dépendance dans le code :
+### 	1.	Importer la dépendance dans le code :
 ```go
 import "github.com/gin-gonic/gin"
 ```
-## 	2.	Installer la dépendance :
+### 	2.	Installer la dépendance :
 ```bash
 go get github.com/gin-gonic/gin
 go mod tidy
 ```
 
-## 	3.	Rebuild les conteneurs :
+### 	3.	Rebuild les conteneurs :
 
 ```bash
 make rebuild

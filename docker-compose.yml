@@ -6,13 +6,18 @@ services:
       context: .
       dockerfile: ./docker/app/Dockerfile
     ports:
-      - "8080:8080"
+      - 8080:3000
+    volumes:
+      - ./app/src:/app/src  # Monte uniquement le répertoire source
+      - ./app/.air.toml:/app/.air.toml  # Monte le fichier de configuration d'Air
     env_file:
       - .env
     environment:
       - DATABASE_URL=${DATABASE_URL}
     depends_on:
       - postgres_db
+    networks:
+      - toolkit_go
 
   postgres_db:
     build:

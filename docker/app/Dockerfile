@@ -1,21 +1,20 @@
-# Utilisation de l'image officielle de Go
+# Utiliser une image de base Golang
 FROM golang:1.22-alpine
 
-# Définition du répertoire de travail
 WORKDIR /app
 
-# Copie du fichier go.mod et go.sum pour gérer les dépendances
+# Installer Air pour le rechargement automatique
+RUN go install github.com/air-verse/air@latest
+
+# Copier les fichiers de mod dans le conteneur
 COPY app/go.mod app/go.sum ./
 RUN go mod download
 
-# Copie du reste des fichiers de l'application
-COPY app/ .
+# Copier tout le code source
+COPY app/src/* ./
 
-# Compilation de l'application
-RUN go build -o main .
+# # Construire l'application
+# RUN cd src && go build -o ../bin/main .
 
-# Exposition du port
-EXPOSE 8080
-
-# Commande pour lancer l'application
-CMD ["./main"]
+# Lancer Air pour le rechargement automatique
+CMD ["air", "-c", "/app/.air.toml"]

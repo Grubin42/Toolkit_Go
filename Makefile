@@ -46,8 +46,5 @@ rebuild-no-cache:
 	@${DOCKER} build --no-cache
 	@${DOCKER} up -d --remove-orphans --build
 
-frankenphp:
-	@echo "${GREEN}Running frankenphp ...${RESET}"
-	@${DOCKER} exec frankenphp sh
 
-.PHONY: all start up down stop rebuild delete rebuild-no-cache frankenphp
+.PHONY: all start up down stop rebuild delete rebuild-no-cache 

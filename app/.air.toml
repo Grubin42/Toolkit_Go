@@ -1,0 +1,4 @@
+[build]
+cmd = "go build -o tmp/main ./src"
+include_ext = ["go"]
+exclude_dir = ["tmp", "vendor"]
