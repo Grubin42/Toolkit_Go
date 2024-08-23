@@ -1,0 +1,33 @@
+# Fichier de configuration pour air
+
+[build]
+# La commande pour construire votre application
+cmd = "go build -o tmp/main ./cmd/app"
+
+# L'extension des fichiers que air surveille pour déclencher une recompilation
+include_ext = ["go", "tpl", "html", "toml"]
+
+# Les répertoires ou fichiers à exclure de la surveillance
+exclude_dir = ["tmp", "vendor"]
+
+# Le dossier de sortie du binaire compilé
+output_dir = "tmp"
+
+[dev]
+# La commande pour exécuter l'application après la compilation
+cmd = "./tmp/main"
+
+# # Les variables d'environnement à utiliser en développement
+# envs = ["DATABASE_HOST=mysql", "DATABASE_PORT=3306", "DATABASE_USER=root", "DATABASE_PASSWORD=root", "DATABASE_NAME=mydatabase"]
+
+# # Les fichiers ou répertoires à recharger automatiquement en cas de changement
+# watch_dir = ["cmd", "internal", "pkg"]
+
+# # Les répertoires ou fichiers à ne pas surveiller
+# exclude_dir = ["tmp", "vendor"]
+
+# # Définir le port sur lequel l'application s'exécute
+# port = 8080
+
+# # Mode de rechargement (par défaut: instant)
+# delay = 200 # en millisecondes
