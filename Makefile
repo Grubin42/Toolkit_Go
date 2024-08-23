@@ -15,6 +15,12 @@ DEV_DIR     = ${SRCS_DIR}docker-compose.override.yml
 DOCKER = docker compose -f ${DOCKER_DIR} --env-file ${ENV_FILE} -p toolkit_go
 DOCKER_DEV = docker compose -f ${DOCKER_DIR} -f ${DEV_DIR} --env-file ${ENV_FILE} -p toolkit_go_dev
 
+# MIGRATE
+# Commande de base pour exécuter les migrations
+# Cette variable contient la commande pour exécuter les migrations, en précisant le chemin des migrations
+# et la base de données cible (ici, MySQL sur localhost avec l'utilisateur root et le mot de passe root).
+MIGRATE = migrate -path ./migrations -database "mysql://root:root@tcp(localhost:3306)/mydatabase"
+
 %:
 	@:
 
@@ -72,4 +78,29 @@ rebuild-no-cache-dev:
 	@${DOCKER_DEV} build --no-cache
 	@${DOCKER_DEV} up -d --remove-orphans --build
 
-.PHONY: all start up down stop rebuild delete rebuild-no-cache up-dev down-dev stop-dev rebuild-dev delete-dev rebuild-no-cache-dev
+# Commande pour appliquer toutes les migrations
+# Cette règle exécute la commande 'migrate up', qui applique toutes les migrations qui n'ont pas encore été exécutées.
+migrate-up:
+	@echo "Applying all up migrations..."
+	@$(MIGRATE) up
+
+# Commande pour annuler la dernière migration
+# Cette règle exécute la commande 'migrate down 1', qui annule la dernière migration appliquée.
+migrate-down:
+	@echo "Reverting the last migration..."
+	@$(MIGRATE) down 1
+
+# Commande pour créer une nouvelle migration
+# Cette règle permet de créer une nouvelle migration. Elle demande d'abord à l'utilisateur de saisir un nom pour la migration,
+# puis exécute la commande pour créer un fichier de migration avec ce nom, dans le répertoire './migrations'.
+migrate-new:
+	@read -p "Enter migration name: " name; \
+	migrate create -ext sql -dir ./migrations -seq $$name
+
+# Commande pour vérifier le statut des migrations
+# Cette règle affiche la version actuelle des migrations appliquées dans la base de données.
+migrate-status:
+	@echo "Checking migration status..."
+	@$(MIGRATE) version
+
+.PHONY: all start up down stop rebuild delete rebuild-no-cache up-dev down-dev stop-dev rebuild-dev delete-dev rebuild-no-cache-dev migrate-up migrate-down migrate-new migrate-status

@@ -1,26 +1,23 @@
 package main
 
 import (
-    "net/http"
     "log"
+    "net/http"
+    "github.com/Grubin42/Toolkit_Go/internal/routers"
+    "github.com/Grubin42/Toolkit_Go/pkg/database"
 )
 
 func main() {
-    http.HandleFunc("/", clientHandler)
-    http.HandleFunc("/admin", adminHandler)
-    
-    log.Println("Starting server on :8080")
-    if err := http.ListenAndServe(":8080", nil); err != nil {
-        log.Fatal(err)
+    // Connexion à la base de données
+    db, err := database.ConnectDB()
+    if err != nil {
+        log.Fatal("Failed to connect to database:", err)
     }
-}
+    defer db.Close()
 
-func clientHandler(w http.ResponseWriter, r *http.Request) {
-    // Gérer les requêtes du client
-    w.Write([]byte("Hello, Client!"))
-}
+    // Configuration des routes
+    router := routers.InitRoutes(db)
 
-func adminHandler(w http.ResponseWriter, r *http.Request) {
-    // Gérer les requêtes de l'admin
-    w.Write([]byte("Hello, Admin!"))
+    log.Println("Server started at :8080")
+    log.Fatal(http.ListenAndServe(":8080", router))
 }

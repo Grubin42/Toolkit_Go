@@ -35,6 +35,9 @@ go.work.sum
 # Répertoire des dépendances (si utilisé)
 # /vendor/
 
+# Dossier temporaire utilisé par Air
+/tmp/
+
 # Ignorer la base de données locale
 /docker/db/data/
 /postgresql/data/
