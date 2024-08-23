@@ -1,0 +1,34 @@
+# Étape 1 : Construction de l'application admin
+FROM golang:1.22.6-alpine AS builder
+
+WORKDIR /app
+
+# Copier les fichiers go.mod et go.sum pour télécharger les dépendances
+COPY cmd/admin/go.mod cmd/admin/go.sum ./
+RUN go mod download
+
+# Copier le reste des fichiers nécessaires à la construction de l'application admin
+COPY cmd/admin/ ./
+# COPY internal/admin/templates /app/templates/
+# COPY internal/admin/assets /app/assets/
+# COPY configs/admin.yaml /app/configs/
+# COPY migrations/ /app/migrations/
+
+# Construire l'application admin
+RUN go build -o admin-app .
+
+# Étape 2 : Créer une image finale minimaliste pour l'application admin
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+# Copier l'application compilée et les fichiers nécessaires dans l'image finale
+COPY --from=builder /app/admin-app /admin-app
+# COPY --from=builder /app/templates /templates
+# COPY --from=builder /app/assets /assets
+# COPY --from=builder /app/configs /configs
+# COPY --from=builder /app/migrations /migrations
+
+CMD ["/admin-app"]
+
+EXPOSE 8080

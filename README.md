@@ -37,12 +37,13 @@ Air est un outil de rechargement à chaud qui permet de recompiler et redémarre
 
 Air est automatiquement démarré lorsque vous lancez la commande make up ou docker-compose up. Il surveille les fichiers de votre projet pour tout changement et les compile automatiquement.
 
-### 2. Vérification des Logs de Compilation
+### 2. Vérification des Logs de Compilation en mode dev 
 
 Pour voir les informations de compilation, les erreurs, et les autres logs produits par Air, vous pouvez utiliser la commande suivante :
 
 ```bash
-docker-compose logs -f app
+docker logs -f toolkit_go_dev-client-app-1
+docker logs -f toolkit_go_dev-admin-app-1
 ```
 Cette commande vous permet de suivre en temps réel les logs du conteneur app, où Air est exécuté.
 
@@ -87,4 +88,51 @@ Pour s’assurer que la dépendance supprimée n’est plus présente, reconstru
 
 ```bash
 make rebuild
+```
+
+### archi actuelle
+
+```bash
+/project-root
+│
+├── /cmd                       # Point d'entrée pour les différentes applications
+│   ├── /client-site           # Application du site client
+│   │   └── main.go
+│   └── /admin                 # Application de l'administration et du toolkit
+│       └── main.go
+│
+├── /pkg                       # Contient les packages partagés (auth, middleware, etc.)
+│   ├── /auth                  # Gestion de l'authentification
+│   ├── /middleware            # Middlewares HTTP (logging, auth, etc.)
+│   ├── /models                # Modèles de données partagés
+│   └── /utils                 # Utilitaires généraux (helpers, validation, etc.)
+│
+├── /internal                  # Code non exporté (logique métier spécifique, non réutilisable)
+│   ├── /client                # Logiciel spécifique au client (non partagé)
+│   │   ├── /handlers          # Handlers HTTP spécifiques au site client
+│   │   ├── /templates         # Templates HTML pour le site client
+│   │   └── /assets            # Assets personnalisés (CSS, JS, images) pour le site client
+│   └── /admin                 # Logiciel spécifique à l'administration
+│       ├── /handlers          # Handlers HTTP pour l'interface admin
+│       ├── /templates         # Templates HTML pour l'interface admin
+│       └── /assets            # Assets pour l'interface admin
+│
+├── /configs                   # Fichiers de configuration pour les différents environnements
+│   ├── /client-site.yaml      # Configuration du site client
+│   └── /admin.yaml            # Configuration de l'administration
+│
+├── /migrations                # Scripts de migration de base de données
+│   └── ...
+│
+├── /docker                    # Dockerfiles et configurations Docker Compose
+│   ├── Dockerfile.client      # Dockerfile pour l'application client
+│   ├── Dockerfile.admin       # Dockerfile pour l'application admin
+│   └── docker-compose.yml     # Configuration Docker Compose pour l'ensemble du projet
+│
+├── /scripts                   # Scripts pour automatiser les tâches (build, test, déploiement)
+│   ├── build.sh               # Script de build pour le projet
+│   └── deploy.sh              # Script de déploiement
+│
+└── go.mod                     # Gestion des dépendances Go
+└── go.sum                     # Fichier checksum pour les dépendances
 ```

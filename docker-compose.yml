@@ -1,56 +1,60 @@
+# docker-compose.yml
 version: '3.8'
 
 services:
-  app:
+  client-app:
     build:
       context: .
-      dockerfile: ./docker/app/Dockerfile
+      dockerfile: ./docker/Dockerfile.client
     ports:
-      - 8080:3000
+      - "${CLIENT_PORT}:8081"
     volumes:
-      - ./app/src:/app/src  # Monte uniquement le répertoire source
-      - ./app/.air.toml:/app/.air.toml  # Monte le fichier de configuration d'Air
-    env_file:
-      - .env
+      - ${UPLOADS_DIR}:/uploads
     environment:
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
     depends_on:
-      - postgres_db
+      - mysql
     networks:
-      - toolkit_go
+      - app-network
 
-  postgres_db:
+  admin-app:
     build:
-      context: ./docker/db
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    container_name: postgres_db
+      context: .
+      dockerfile: ./docker/Dockerfile.admin
     ports:
-      - "5432:5432"
+      - "${ADMIN_PORT}:8080"
     volumes:
-      - ./docker/db/data:/var/lib/postgresql/data
-      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ${UPLOADS_DIR}:/uploads
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      TZ: "Europe/Zurich"
-    networks:
-      - toolkit_go
-
-  web:
-    build:
-      context: ./docker/web
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
     depends_on:
-      - app
-    volumes:
-      - ./docker/web/Caddyfile:/etc/caddy/Caddyfile
+      - mysql
     networks:
-      - toolkit_go
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
 
 networks:
-  toolkit_go:
+  app-network:
     driver: bridge
