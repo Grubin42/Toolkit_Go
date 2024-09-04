@@ -36,7 +36,7 @@ go.work.sum
 # /vendor/
 
 # Dossier temporaire utilisé par Air
-/tmp/
+tmp/
 
 # Ignorer la base de données locale
 /docker/db/data/
