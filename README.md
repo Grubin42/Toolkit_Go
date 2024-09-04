@@ -153,6 +153,46 @@ Pour s’assurer que la dépendance supprimée n’est plus présente, reconstru
 make rebuild-dev
 ```
 
+## Comment mettre à jour les dépendances dans Go
+
+### 	1.	Mettre à jour une dépendance spécifique :
+
+Pour mettre à jour une dépendance spécifique, utilise la commande suivante :
+
+```bash
+go get -u nom_du_module
+```
+
+Par exemple, pour mettre à jour go-sql-driver/mysql, tu ferais :
+
+```bash
+go get -u github.com/go-sql-driver/mysql
+```
+
+### 	2.	Mettre à jour toutes les dépendances :
+
+Pour mettre à jour toutes les dépendances à leur dernière version compatible :
+
+```bash
+go get -u ./...
+```
+
+### 	3.	Vérifier et nettoyer les dépendances :
+
+Après avoir mis à jour les dépendances, utilise la commande go mod tidy pour nettoyer le fichier go.mod en supprimant les dépendances inutilisées et en ajoutant celles qui manquent :
+
+```bash 
+go mod tidy
+```
+
+### 	4.	Vérifier les mises à jour disponibles :
+
+Tu peux utiliser l’outil go list -m -u all pour vérifier les mises à jour disponibles de toutes les dépendances sans les installer immédiatement.
+
+```bash
+go list -m -u all
+```
+
 ## Gestion des Migrations
 
 Les migrations de base de données sont gérées par l’outil migrate.
