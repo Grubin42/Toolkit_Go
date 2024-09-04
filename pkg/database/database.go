@@ -3,8 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql" // Import du driver MySQL
 	"os"
+	_ "github.com/go-sql-driver/mysql" // Import du driver MySQL
 )
 
 // ConnectDB établit la connexion à la base de données MySQL

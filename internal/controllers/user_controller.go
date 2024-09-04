@@ -56,7 +56,6 @@ func (uc *UserController) HandleIndex(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-// Renommez la méthode en ListUsers pour qu'elle soit exportée
 func (uc *UserController) ListUsers(w http.ResponseWriter, r *http.Request) {
     users, err := uc.service.GetAllUsers()
     if err != nil {
