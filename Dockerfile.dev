@@ -16,6 +16,9 @@ RUN go mod download
 # Copier tout le code source
 COPY . .
 
+# Copier les fichiers de templates
+COPY cmd/Presentation/Views /app/cmd/Presentation/Views
+
 # S'assurer que le fichier .air.toml est copié
 COPY .air.toml /app
 

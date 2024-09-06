@@ -1,7 +1,7 @@
-package Database
+package database
 
 import (
-	"Database/sql"
+	"database/sql"
 	"fmt"
 	"os"
 	_ "github.com/go-sql-driver/mysql" // Import du driver MySQL

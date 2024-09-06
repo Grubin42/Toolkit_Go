@@ -4,12 +4,12 @@ import (
     "log"
     "net/http"
     "github.com/Grubin42/Toolkit_Go/cmd/Routers"
-    "github.com/Grubin42/Toolkit_Go/cmd/Core/Database"
+    "github.com/Grubin42/Toolkit_Go/cmd/Core/database"
 )
 
 func main() {
     // Connexion à la base de données
-    db, err := Database.ConnectDB()
+    db, err := database.ConnectDB()
     if err != nil {
         log.Fatal("Failed to connect to database:", err)
     }

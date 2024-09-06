@@ -1,7 +1,7 @@
 package Services
 
 import (
-    "Database/sql"
+    "database/sql"
     "github.com/Grubin42/Toolkit_Go/cmd/Presentation/Models"
 )
 

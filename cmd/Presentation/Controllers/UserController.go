@@ -1,7 +1,7 @@
 package Controllers
 
 import (
-    "Database/sql"
+    "database/sql"
     "encoding/json"
     "html/template"
     "net/http"
@@ -17,7 +17,7 @@ type UserController struct {
 }
 
 func NewUserController(db *sql.DB) *UserController {
-    templates := template.Must(template.ParseFiles("templates/index.html", "templates/users.html"))
+    templates := template.Must(template.ParseFiles("cmd/Presentation/Views/Home/index.html", "cmd/Presentation/Views/Users/users.html"))
     return &UserController{
         service:   Services.NewUserService(db),
         templates: templates,

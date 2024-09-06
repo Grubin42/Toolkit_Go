@@ -2,7 +2,7 @@
 
 [build]
 # La commande pour construire votre application
-cmd = "go build -o tmp/main ./cmd/app"
+cmd = "go build -o tmp/main ./cmd/Presentation"
 
 # L'extension des fichiers que air surveille pour déclencher une recompilation
 include_ext = ["go", "tpl", "html", "toml"]

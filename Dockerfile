@@ -26,6 +26,9 @@ RUN apk --no-cache add ca-certificates
 COPY --from=builder /app/main .
 COPY --from=builder /go/bin/migrate /usr/local/bin/migrate
 
+# Copier les fichiers de templates dans l'image de production
+COPY --from=builder /app/cmd/Presentation/Views /app/cmd/Presentation/Views
+
 # Exposer le port sur lequel l'application écoute
 EXPOSE 8080
 

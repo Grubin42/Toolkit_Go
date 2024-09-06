@@ -1,8 +1,7 @@
 package Routers
 
 import (
-    "Database/sql"
- //   "Test/cmd/Grubin42/Toolkit_Go/Presentation/controllers"
+    "database/sql"
     "net/http"
     "github.com/Grubin42/Toolkit_Go/cmd/Presentation/Controllers"
 )
