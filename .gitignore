@@ -41,6 +41,3 @@ tmp/
 # Ignorer la base de données locale
 /docker/db/data/
 /postgresql/data/
-
-# Caches Docker
-docker-compose.override.yml
