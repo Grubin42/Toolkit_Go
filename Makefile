@@ -20,7 +20,7 @@ DOCKER_NAME = toolkit_go_dev-app-1
 # Commande de base pour exécuter les migrations
 # Cette variable contient la commande pour exécuter les migrations, en précisant le chemin des migrations
 # et la base de données cible (ici, MySQL sur localhost avec l'utilisateur root et le mot de passe root).
-MIGRATE = migrate -path ./migrations -database "mysql://root:root@tcp(localhost:3306)/mydatabase"
+MIGRATE = /go/bin/migrate -path ./migrations -database "mysql://root:root@tcp(mysql:3306)/mydatabase"
 
 %:
 	@:
@@ -94,7 +94,7 @@ migrate-down:
 # puis exécute la commande pour créer un fichier de migration avec ce nom, dans le répertoire './migrations'.
 migrate-new:
 	@read -p "Enter migration name: " name; \
-	@docker exec -it $(DOCKER_NAME) migrate create -ext sql -dir ./migrations -seq $$name
+	@docker exec -it $(DOCKER_NAME) /go/bin/migrate create -ext sql -dir ./migrations -seq $$name
 
 # Commande pour vérifier le statut des migrations
 # Cette règle affiche la version actuelle des migrations appliquées dans la base de données.
