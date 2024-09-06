@@ -1,17 +1,14 @@
 package Controllers
 
 import (
-    "database/sql"
+    "Database/sql"
     "encoding/json"
     "html/template"
     "net/http"
     "strconv"
 	"strings"
-    //"github.com/Grubin42/Toolkit_Go/internal/models"
-    //"github.com/Grubin42/Toolkit_Go/internal/services"
-    "Presentation/Models"
-    "Infrastructure/Services"
-
+    "github.com/Grubin42/Toolkit_Go/cmd/Presentation/Models"
+    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Services"
 )
 
 type UserController struct {

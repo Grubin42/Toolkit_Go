@@ -20,7 +20,7 @@ DOCKER_NAME = toolkit_go_dev-app-1
 # Commande de base pour exécuter les migrations
 # Cette variable contient la commande pour exécuter les migrations, en précisant le chemin des migrations
 # et la base de données cible (ici, MySQL sur localhost avec l'utilisateur root et le mot de passe root).
-MIGRATE = /go/bin/migrate -path ./migrations -database "mysql://root:root@tcp(mysql:3306)/mydatabase"
+MIGRATE = /go/bin/migrate -path ./migrations -Database "mysql://root:root@tcp(mysql:3306)/mydatabase"
 
 %:
 	@:

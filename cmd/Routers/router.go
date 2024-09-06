@@ -1,17 +1,17 @@
 package Routers
 
 import (
-    "database/sql"
+    "Database/sql"
  //   "Test/cmd/Grubin42/Toolkit_Go/Presentation/controllers"
     "net/http"
-    "cmd/Presentation/controllers"
+    "github.com/Grubin42/Toolkit_Go/cmd/Presentation/Controllers"
 )
 
 func InitRoutes(db *sql.DB) *http.ServeMux {
     router := http.NewServeMux()
 
     // Route pour les utilisateurs
-    userController := controllers.NewUserController(db)
+    userController := Controllers.NewUserController(db)
 
     // Routes
     router.HandleFunc("/", userController.HandleIndex)      // Utilise HandleIndex pour afficher le formulaire
