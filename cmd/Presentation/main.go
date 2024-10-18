@@ -3,8 +3,8 @@ package main
 import (
     "log"
     "net/http"
-    "github.com/Grubin42/Toolkit_Go/cmd/Routers"
-    "github.com/Grubin42/Toolkit_Go/cmd/Core/database"
+    "github.com/Grubin42/Toolkit_Go/cmd/Core/Routers"
+    "github.com/Grubin42/Toolkit_Go/cmd/Core/Database"
 )
 
 func main() {
@@ -19,5 +19,7 @@ func main() {
     router := Routers.InitRoutes(db)
 
     log.Println("Server started at :8080")
-    log.Fatal(http.ListenAndServe(":8080", router))
+    if err := http.ListenAndServe(":8080", router); err != nil {
+        log.Fatalf("Erreur du serveur: %v", err)
+    }
 }

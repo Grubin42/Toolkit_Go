@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"time"
-
 	_ "github.com/go-sql-driver/mysql" // Import du driver MySQL
 )
 
