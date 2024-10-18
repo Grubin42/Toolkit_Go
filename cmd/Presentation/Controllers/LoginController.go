@@ -31,7 +31,7 @@ func (hc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         Title string
         // Ajoutez d'autres données si nécessaire
     }{
-        Title: "Login",
+        Title: "login",
     }
 
     // Exécuter le template 'base.html' en injectant 'Home/index.html'

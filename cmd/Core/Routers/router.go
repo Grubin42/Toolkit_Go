@@ -20,8 +20,8 @@ func InitRoutes(db *sql.DB) *http.ServeMux {
     router.HandleFunc("/", homeController.HandleIndex)
     router.HandleFunc("/admin", adminController.HandleIndex)
     
-    router.HandleFunc("/Register", registerController.HandleIndex)
-    router.HandleFunc("/Login", loginController.HandleIndex)
+    router.HandleFunc("/register", registerController.HandleIndex)
+    router.HandleFunc("/login", loginController.HandleIndex)
 
     return router
 }
