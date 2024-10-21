@@ -4,6 +4,7 @@ import (
     "database/sql"
     "net/http"
     "github.com/Grubin42/Toolkit_Go/cmd/Presentation/Controllers"
+
 )
 
 func InitRoutes(db *sql.DB) *http.ServeMux {
@@ -13,7 +14,7 @@ func InitRoutes(db *sql.DB) *http.ServeMux {
     homeController := Controllers.NewHomeController()
     adminController := Controllers.NewAdminController()
 
-    registerController := Controllers.NewRegisterController()
+    registerController := Controllers.NewRegisterController(db)
     loginController := Controllers.NewLoginController()
 
     // Définir la route "/"
