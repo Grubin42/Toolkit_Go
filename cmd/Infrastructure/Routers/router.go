@@ -15,7 +15,7 @@ func InitRoutes(db *sql.DB) *http.ServeMux {
     adminController := Controllers.NewAdminController()
 
     registerController := Controllers.NewRegisterController(db)
-    loginController := Controllers.NewLoginController()
+    loginController := Controllers.NewLoginController(db)
 
     // Définir la route "/"
     router.HandleFunc("/", homeController.HandleIndex)

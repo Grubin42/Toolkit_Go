@@ -1,6 +1,14 @@
 {{ define "content" }}
 <div class="register-container">
     <h2>Register</h2>
+
+    <!-- Affichage du message d'erreur s'il existe -->
+    {{ if .ErrorMessage }}
+    <div class="error-message" style="color: red;">
+        {{ .ErrorMessage }}
+    </div>
+    {{ end }}
+
     <form action="/register" method="POST">
         <div>
             <label for="username">Username:</label>

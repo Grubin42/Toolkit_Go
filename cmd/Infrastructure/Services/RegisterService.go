@@ -1,64 +1,72 @@
 package Services
 
 import (
-	"github.com/Grubin42/Toolkit_Go/cmd/Core/Models"
-	"errors"
-	"log"
-	"database/sql"
-	"golang.org/x/crypto/bcrypt"
+    "database/sql"
+    "github.com/Grubin42/Toolkit_Go/cmd/Core/Models"
+    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
+    "log"
+    "net/http"
+    "strings"
+    "errors"
 )
 
 type RegisterService struct {
-	db *sql.DB
+    db *sql.DB
 }
 
 func NewRegisterService(db *sql.DB) *RegisterService {
     return &RegisterService{
-		db: db,
-	}
+        db: db,
+    }
 }
 
-func (rs *RegisterService) RegisterUser(username, email, password, confirmPassword string) error {
-    // Validation des données
+// RegisterUser enregistre un utilisateur après validation et hachage du mot de passe
+func (rs *RegisterService) RegisterUser(username, email, password, confirmPassword string) (int, error) {
+    // Validation du nom d'utilisateur
+    if err := Utils.ValidateUsername(username); err != nil {
+        return http.StatusBadRequest, err
+    }
+
+    // Validation de l'email
+    if err := Utils.ValidateEmail(email); err != nil {
+        return http.StatusBadRequest, err
+    }
+
+    // Validation du mot de passe
+    passwordErrors := Utils.ValidatePassword(password)
+    if len(passwordErrors) > 0 {
+        return http.StatusBadRequest, errors.New(strings.Join(passwordErrors, ", "))
+    }
+
+    // Vérifier si les mots de passe correspondent
     if password != confirmPassword {
-        return errors.New("les mots de passe ne correspondent pas")
+        return http.StatusBadRequest, errors.New("les mots de passe ne correspondent pas")
     }
-    
-    if username == "" || email == "" || password == "" {
-        return errors.New("tous les champs sont requis")
+
+    // Hachage du mot de passe
+    passwordHash, err := Utils.HashPassword(password)
+    if err != nil {
+        log.Printf("Erreur lors du hachage du mot de passe : %v", err)
+        return http.StatusInternalServerError, err
     }
-    
-    // Hash du mot de passe (tu devras utiliser un package de hashage comme bcrypt)
-    passwordHash, erro := hashPassword(password)
-	if erro != nil {
-		log.Printf("Erreur lors du hachage du mot de passe : %v", erro)
-		return erro // Retourner l'erreur si le hachage échoue
-	}
-    // Création de l'utilisateur
+
+    // Création d'un utilisateur
     user := Models.User{
-        Name:     username,
+        Name:         username,
         Email:        email,
         PasswordHash: passwordHash,
     }
 
-    // Sauvegarde dans la base de données (cette partie dépend de ta configuration de la base de données)
-    err := user.Save(rs.db)
+    // Sauvegarde dans la base de données
+    err = user.Save(rs.db)
     if err != nil {
-        log.Printf("Erreur lors de l'enregistrement de l'utilisateur : %v", err)
-        return err
+        // Retourner une erreur HTTP spécifique si l'email est déjà utilisé
+        if strings.Contains(err.Error(), "cette adresse email est déjà utilisée") {
+            return http.StatusConflict, err // HTTP 409 Conflict
+        }
+        return http.StatusInternalServerError, err
     }
 
-    return nil
-}
-
-func hashPassword(password string) (string, error) {
-    // Générer le hachage avec un coût par défaut (bcrypt.DefaultCost)
-    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-    if err != nil {
-        log.Printf("Erreur lors du hachage du mot de passe : %v", err)
-        return "", err
-    }
-
-    // Retourner le mot de passe haché sous forme de chaîne
-    return string(hashedPassword), nil
+    // Retourner 201 Created en cas de succès
+    return http.StatusCreated, nil
 }

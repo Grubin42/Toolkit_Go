@@ -4,6 +4,8 @@ import (
     "database/sql"
     "errors"
     "log"
+    "strings"
+    "github.com/go-sql-driver/mysql" // Import du driver MySQL pour gérer les erreurs spécifiques
 )
 
 type User struct {
@@ -13,10 +15,8 @@ type User struct {
     PasswordHash string `json:"PasswordHash"`
 }
 
-// Exemple de fonction de sauvegarde (à remplacer par la logique de ton repository)
 // Save enregistre l'utilisateur dans la base de données en utilisant des requêtes SQL natives
 func (u *User) Save(db *sql.DB) error {
-    // Vérifier si les informations obligatoires sont présentes
     if u.Name == "" || u.Email == "" || u.PasswordHash == "" {
         return errors.New("les informations de l'utilisateur sont incomplètes")
     }
@@ -31,19 +31,34 @@ func (u *User) Save(db *sql.DB) error {
     defer stmt.Close()
 
     // Exécuter l'insertion
-    result, err := stmt.Exec(u.Name, u.Email, u.PasswordHash)
+    _, err = stmt.Exec(u.Name, u.Email, u.PasswordHash)
     if err != nil {
+        // Vérification de l'erreur MySQL spécifique pour les duplicata
+        if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+            // Intercepter l'erreur de duplicata et retourner un message clair
+            if strings.Contains(mysqlErr.Message, "users.email") {
+                return errors.New("cette adresse email est déjà utilisée")
+            }
+        }
         log.Printf("Erreur lors de l'insertion de l'utilisateur : %v", err)
         return err
     }
 
-    // Récupérer l'ID généré
-    lastInsertID, err := result.LastInsertId()
+    return nil
+}
+
+// FindByUsernameOrEmail récupère un utilisateur à partir de son nom d'utilisateur ou de son email
+func (u *User) FindByUsernameOrEmail(db *sql.DB, identifier string) error {
+    query := "SELECT id, name, email, passwordhash FROM users WHERE name = ? OR email = ? LIMIT 1"
+    row := db.QueryRow(query, identifier, identifier)
+    
+    err := row.Scan(&u.ID, &u.Name, &u.Email, &u.PasswordHash)
     if err != nil {
-        log.Printf("Erreur lors de la récupération de l'ID de l'utilisateur : %v", err)
+        if err == sql.ErrNoRows {
+            return errors.New("utilisateur non trouvé")
+        }
         return err
     }
 
-    u.ID = int(lastInsertID)
     return nil
 }

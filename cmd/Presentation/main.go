@@ -3,7 +3,7 @@ package main
 import (
     "log"
     "net/http"
-    "github.com/Grubin42/Toolkit_Go/cmd/Core/Routers"
+    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Routers"
     "github.com/Grubin42/Toolkit_Go/cmd/Core/Database"
 )
 

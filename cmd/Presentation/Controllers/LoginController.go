@@ -2,17 +2,19 @@ package Controllers
 
 import (
     "html/template"
-	"net/http"
+    "log"
+    "net/http"
     "path/filepath"
-	"log"
+    "database/sql"
+    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Services"
 )
 
 type LoginController struct {
-    templates *template.Template
+    templates    *template.Template
+    loginService *Services.LoginService
 }
 
-func NewLoginController() *LoginController {
-    // Charger les templates au démarrage
+func NewLoginController(db *sql.DB) *LoginController {
     tmpl, err := template.ParseFiles(
         filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
         filepath.Join("cmd", "Presentation", "Views", "Login", "index.html"),
@@ -22,20 +24,39 @@ func NewLoginController() *LoginController {
     }
 
     return &LoginController{
-        templates: tmpl,
+        templates:    tmpl,
+        loginService: Services.NewLoginService(db),
     }
 }
 
-func (hc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
-    data := struct {
-        Title string
-        // Ajoutez d'autres données si nécessaire
-    }{
-        Title: "login",
+func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
+    var errorMessage string
+
+    if r.Method == http.MethodPost {
+        identifier := r.FormValue("username") // Cela peut être l'email ou le nom d'utilisateur
+        password := r.FormValue("password")
+
+        // Appeler le service de connexion
+        status, err := lc.loginService.LoginUser(identifier, password)
+        if err != nil {
+            w.WriteHeader(status)
+            errorMessage = err.Error()
+        } else {
+            // Redirection après une connexion réussie
+            http.Redirect(w, r, "/", http.StatusSeeOther)
+            return
+        }
     }
 
-    // Exécuter le template 'base.html' en injectant 'Home/index.html'
-    err := hc.templates.ExecuteTemplate(w, "base", data)
+    data := struct {
+        Title       string
+        ErrorMessage string
+    }{
+        Title:       "login",
+        ErrorMessage: errorMessage,
+    }
+
+    err := lc.templates.ExecuteTemplate(w, "base", data)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     }

@@ -1,6 +1,14 @@
 {{ define "content" }}
 <div class="login-container">
     <h2>Login</h2>
+
+    <!-- Affichage du message d'erreur s'il existe -->
+    {{ if .ErrorMessage }}
+    <div class="error-message" style="color: red;">
+        {{ .ErrorMessage }}
+    </div>
+    {{ end }}
+
     <form action="/login" method="POST">
         <div>
             <label for="username">Username or Email:</label>
