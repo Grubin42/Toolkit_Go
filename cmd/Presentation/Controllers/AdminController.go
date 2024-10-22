@@ -16,6 +16,7 @@ func NewAdminController() *AdminController {
     // Charger les templates nécessaires
     tmpl, err := template.ParseFiles(
         filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
+        filepath.Join("cmd", "Presentation", "Views", "Layout", "navbar.html"),
         filepath.Join("cmd", "Presentation", "Views", "Admin", "index.html"),
     )
     if err != nil {

@@ -4,14 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <title>{{.Title}}</title>
+    <link rel="stylesheet" href="cmd/Presentation/Assets/css/style.css">
 </head>
 <body>
     <header>
-        <h1>Mon Application Go</h1>
+        <!-- Inclusion de la navbar -->
+        {{ template "navbar" . }}
     </header>
+
     <main>
         {{ template "content" . }}
     </main>
+    
     <footer>
         <p>&copy; 2024 Mon Application</p>
     </footer>

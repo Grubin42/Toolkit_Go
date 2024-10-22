@@ -15,6 +15,7 @@ func NewHomeController() *HomeController {
     // Charger les templates au démarrage
     tmpl, err := template.ParseFiles(
         filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
+        filepath.Join("cmd", "Presentation", "Views", "Layout", "navbar.html"),
         filepath.Join("cmd", "Presentation", "Views", "Home", "index.html"),
     )
     if err != nil {

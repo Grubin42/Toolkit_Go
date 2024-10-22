@@ -17,6 +17,7 @@ type RegisterController struct {
 func NewRegisterController(db *sql.DB) *RegisterController {
     tmpl, err := template.ParseFiles(
         filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
+        filepath.Join("cmd", "Presentation", "Views", "Layout", "navbar.html"),
         filepath.Join("cmd", "Presentation", "Views", "Register", "index.html"),
     )
     if err != nil {
