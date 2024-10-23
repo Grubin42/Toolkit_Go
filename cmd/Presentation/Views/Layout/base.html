@@ -1,24 +1,24 @@
 {{ define "base" }}
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>{{.Title}}</title>
-    <link rel="stylesheet" href="cmd/Presentation/Assets/css/style.css">
-</head>
-<body>
-    <header>
-        <!-- Inclusion de la navbar -->
-        {{ template "navbar" . }}
-    </header>
+    <head>
+        <meta charset="UTF-8">
+        <title>{{.Title}}</title>
+        <link rel="stylesheet" href="/assets/css/style.css">
+    </head>
+    <body>
+        <header>
+            <!-- Inclusion de la navbar -->
+            {{ template "navbar" . }}
+        </header>
 
-    <main>
-        {{ template "content" . }}
-    </main>
-    
-    <footer>
-        <p>&copy; 2024 Mon Application</p>
-    </footer>
-</body>
+        <main>
+            {{ template "content" . }}
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 Mon Application</p>
+        </footer>
+    </body>
 </html>
 {{ end }}

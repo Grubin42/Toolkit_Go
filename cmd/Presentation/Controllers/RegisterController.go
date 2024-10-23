@@ -2,11 +2,10 @@ package Controllers
 
 import (
     "html/template"
-    "log"
     "net/http"
-    "path/filepath"
     "database/sql"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Services"
+    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
 )
 
 type RegisterController struct {
@@ -15,17 +14,8 @@ type RegisterController struct {
 }
 
 func NewRegisterController(db *sql.DB) *RegisterController {
-    tmpl, err := template.ParseFiles(
-        filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
-        filepath.Join("cmd", "Presentation", "Views", "Layout", "navbar.html"),
-        filepath.Join("cmd", "Presentation", "Views", "Register", "index.html"),
-    )
-    if err != nil {
-        log.Fatalf("Erreur lors du parsing des templates: %v", err)
-    }
-
     return &RegisterController{
-        templates:       tmpl,
+        templates:       Utils.LoadTemplates("Register/index.html"),
         registerService: Services.NewRegisterService(db),
     }
 }

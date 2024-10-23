@@ -2,12 +2,11 @@ package Controllers
 
 import (
     "html/template"
-    "log"
     "net/http"
-    "path/filepath"
     "database/sql"
     "time"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Services"
+    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
 )
 
 type LoginController struct {
@@ -16,17 +15,8 @@ type LoginController struct {
 }
 
 func NewLoginController(db *sql.DB) *LoginController {
-    tmpl, err := template.ParseFiles(
-        filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
-        filepath.Join("cmd", "Presentation", "Views", "Layout", "navbar.html"),
-        filepath.Join("cmd", "Presentation", "Views", "Login", "index.html"),
-    )
-    if err != nil {
-        log.Fatalf("Erreur lors du parsing des templates: %v", err)
-    }
-
     return &LoginController{
-        templates:    tmpl,
+        templates:    Utils.LoadTemplates("Login/index.html"),
         loginService: Services.NewLoginService(db),
     }
 }
