@@ -17,11 +17,16 @@ func NewHomeController() *HomeController {
 }
 
 func (hc *HomeController) HandleIndex(w http.ResponseWriter, r *http.Request) {
+    // Vérifier la présence du cookie JWT pour déterminer si l'utilisateur est connecté
+    isAuthenticated := Utils.IsAuthentificated(r)
+
+    // Passer les données au template
     data := struct {
-        Title string
-        // Ajoutez d'autres données si nécessaire
+        Title           string
+        IsAuthenticated bool
     }{
-        Title: "Accueil",
+        Title:           "Accueil",
+        IsAuthenticated: isAuthenticated,
     }
 
     // Exécuter le template 'base.html' en injectant 'Home/index.html'

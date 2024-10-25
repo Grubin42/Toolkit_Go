@@ -24,6 +24,9 @@ func NewLoginController(db *sql.DB) *LoginController {
 func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
     var errorMessage string
 
+    // Vérifier la présence du cookie JWT pour déterminer si l'utilisateur est connecté
+    isAuthenticated := Utils.IsAuthentificated(r)
+    
     if r.Method == http.MethodPost {
         identifier := r.FormValue("username")
         password := r.FormValue("password")
@@ -31,19 +34,19 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         // Appeler le service de connexion pour obtenir le JWT
         status, token, err := lc.loginService.LoginUser(identifier, password)
         if err != nil {
-            w.WriteHeader(status)
-            errorMessage = err.Error()
-            http.Error(w, errorMessage, status)
+            http.Error(w, err.Error(), status)
             return
         }
+
         // Stocker le JWT dans un cookie sécurisé
         http.SetCookie(w, &http.Cookie{
             Name:     "jwt_token",
             Value:    token,
             Expires:  time.Now().Add(24 * time.Hour),
-            HttpOnly: true, // Pour empêcher l'accès côté client
-            Secure:   false, // À activer en production (HTTPS)
-            SameSite: http.SameSiteStrictMode,  // Empêche les attaques CSRF
+            HttpOnly: true,
+            Secure:   false,
+            Path:     "/",
+            SameSite: http.SameSiteStrictMode,
         })
 
         // Rediriger après une connexion réussie
@@ -51,12 +54,15 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Passer l'état de connexion à la vue
     data := struct {
-        Title       string
-        ErrorMessage string
+        Title           string
+        ErrorMessage    string
+        IsAuthenticated bool
     }{
-        Title:       "login",
-        ErrorMessage: errorMessage,
+        Title:           "Accueil",
+        ErrorMessage:    errorMessage,
+        IsAuthenticated: isAuthenticated,
     }
 
     err := lc.templates.ExecuteTemplate(w, "base", data)

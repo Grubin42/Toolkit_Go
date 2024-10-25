@@ -7,9 +7,14 @@
         </a>
     </div>
     <div class="navbar-right">
-        <!-- Liens vers login et register -->
-        <a href="/login" class="btn">Login</a>
-        <a href="/register" class="btn">Register</a>
+        {{ if .IsAuthenticated }}
+            <!-- L'utilisateur est connecté, afficher le bouton Logout -->
+            <a href="/logout" class="btn">Logout</a>
+        {{ else }}
+            <!-- L'utilisateur n'est pas connecté, afficher les boutons Login et Register -->
+            <a href="/login" class="btn">Login</a>
+            <a href="/register" class="btn">Register</a>
+        {{ end }}
     </div>
 </nav>
 {{ end }}

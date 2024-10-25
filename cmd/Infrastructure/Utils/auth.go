@@ -1,9 +1,10 @@
 package Utils
 
 import (
-    "github.com/golang-jwt/jwt/v5"
-    "time"
-    "errors"
+	"errors"
+	"net/http"
+	"time"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Clé secrète utilisée pour signer les tokens (doit être sécurisée et stockée dans les variables d'environnement en production)
@@ -19,7 +20,6 @@ func GenerateJWT(userID int) (string, error) {
 
     // Créer un nouveau token avec la méthode de signature HMAC et les claims
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
     // Signer le token avec la clé secrète
     tokenString, err := token.SignedString(jwtSecret)
     if err != nil {
@@ -40,8 +40,25 @@ func ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 
     // Vérifier si le token est valide
     if err != nil || !token.Valid {
-        return nil, errors.New("token invalide ou expiré")
+        return nil, errors.New("token invalide ou expiré. Veuillez-vous authentifier")
+    }
+    
+    return claims, nil
+}
+
+func IsAuthentificated(r *http.Request) bool {
+    cookie, err := r.Cookie("jwt_token")
+    if err != nil || cookie == nil {
+        // Le cookie n'existe pas ou une erreur est survenue
+        return false
     }
 
-    return claims, nil
+    // Vérifiez si la valeur du cookie n'est pas vide
+    if cookie.Value == "" {
+        return false
+    }
+
+    // Ajoutez d'autres vérifications si nécessaire
+
+    return true
 }
