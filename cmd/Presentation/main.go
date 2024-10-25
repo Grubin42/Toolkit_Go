@@ -11,15 +11,15 @@ func main() {
     // Connexion à la base de données
     db, err := database.ConnectDB()
     if err != nil {
-        log.Fatal("Failed to connect to database:", err)
+        log.Fatal("Erreur lors de la connexion à la base de données :", err)
     }
     defer db.Close()
 
-    // Configuration des routes
+    // Initialisation des routes
     router := Routers.InitRoutes(db)
 
-    log.Println("Server started at :8080")
+    log.Println("Serveur démarré sur le port :8080")
     if err := http.ListenAndServe(":8080", router); err != nil {
-        log.Fatalf("Erreur du serveur: %v", err)
+        log.Fatalf("Erreur du serveur : %v", err)
     }
 }

@@ -3,9 +3,8 @@ package Controllers
 
 import (
     "html/template"
-    "log"
     "net/http"
-    "path/filepath"
+    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
 )
 
 type AdminController struct {
@@ -13,17 +12,8 @@ type AdminController struct {
 }
 
 func NewAdminController() *AdminController {
-    // Charger les templates nécessaires
-    tmpl, err := template.ParseFiles(
-        filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
-        filepath.Join("cmd", "Presentation", "Views", "Admin", "index.html"),
-    )
-    if err != nil {
-        log.Fatalf("Erreur lors du parsing des templates Admin: %v", err)
-    }
-
     return &AdminController{
-        templates: tmpl,
+        templates: Utils.LoadTemplates("Admin/index.html"),
     }
 }
 

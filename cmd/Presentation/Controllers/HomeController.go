@@ -3,8 +3,7 @@ package Controllers
 import (
     "html/template"
     "net/http"
-    "path/filepath"
-	"log"
+    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
 )
 
 type HomeController struct {
@@ -12,17 +11,8 @@ type HomeController struct {
 }
 
 func NewHomeController() *HomeController {
-    // Charger les templates au démarrage
-    tmpl, err := template.ParseFiles(
-        filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
-        filepath.Join("cmd", "Presentation", "Views", "Home", "index.html"),
-    )
-    if err != nil {
-        log.Fatalf("Erreur lors du parsing des templates: %v", err)
-    }
-
     return &HomeController{
-        templates: tmpl,
+        templates: Utils.LoadTemplates("Home/index.html"),
     }
 }
 

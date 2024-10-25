@@ -1,20 +1,25 @@
 {{ define "base" }}
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>{{.Title}}</title>
-</head>
-<body>
-    <header>
-        <h1>Mon Application Go</h1>
-    </header>
-    <main>
-        {{ template "content" . }}
-    </main>
-    <footer>
-        <p>&copy; 2024 Mon Application</p>
-    </footer>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>{{.Title}}</title>
+        <link rel="preload" href="/assets/css/style.css" as="style" onload="this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="/assets/css/style.css"></noscript>
+    </head>
+    <body>
+        <header>
+            <!-- Inclusion de la navbar -->
+            {{ template "navbar" . }}
+        </header>
+
+        <main>
+            {{ template "content" . }}
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 Mon Application</p>
+        </footer>
+    </body>
 </html>
 {{ end }}
