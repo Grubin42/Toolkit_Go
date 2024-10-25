@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 	"github.com/golang-jwt/jwt/v5"
+    "strings"
 )
 
 // Clé secrète utilisée pour signer les tokens (doit être sécurisée et stockée dans les variables d'environnement en production)
@@ -42,23 +43,16 @@ func ValidateJWT(tokenString string) (jwt.MapClaims, error) {
     if err != nil || !token.Valid {
         return nil, errors.New("token invalide ou expiré. Veuillez-vous authentifier")
     }
-    
+
     return claims, nil
 }
 
 func IsAuthentificated(r *http.Request) bool {
     cookie, err := r.Cookie("jwt_token")
-    if err != nil || cookie == nil {
-        // Le cookie n'existe pas ou une erreur est survenue
+    if err != nil {
         return false
     }
 
-    // Vérifiez si la valeur du cookie n'est pas vide
-    if cookie.Value == "" {
-        return false
-    }
-
-    // Ajoutez d'autres vérifications si nécessaire
-
-    return true
+    token := cookie.Value
+    return strings.TrimSpace(token) != ""
 }
