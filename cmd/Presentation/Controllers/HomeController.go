@@ -12,7 +12,7 @@ type HomeController struct {
 
 func NewHomeController() *HomeController {
     return &HomeController{
-        templates: Utils.LoadTemplates("Home/index.html"),
+        templates: Utils.LoadTemplates("Home/index.html"),//exemple si plusieur templates/composants "templates: Utils.LoadTemplates("Home/index.html", "Home/featured.html", "Home/contact.html"),"
     }
 }
 

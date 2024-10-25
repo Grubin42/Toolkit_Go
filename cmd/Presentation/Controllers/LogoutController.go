@@ -18,7 +18,7 @@ func (lc *LogoutController) HandleLogout(w http.ResponseWriter, r *http.Request)
         Value:    "",
         Expires:  time.Unix(0, 0), // Date d'expiration passée pour supprimer le cookie
         HttpOnly: true,
-        Secure:   true, // Utiliser true si HTTPS est activé
+        Secure:   false, // Utiliser true si HTTPS est activé
     })
 
     // Rediriger vers la page de login après la déconnexion

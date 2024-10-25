@@ -40,7 +40,7 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         http.SetCookie(w, &http.Cookie{
             Name:     "jwt_token",
             Value:    token,
-            Expires:  time.Now().Add(24 * time.Hour),
+            Expires:  time.Now().Add(Utils.GetTokenExpiration()),
             HttpOnly: true, // Pour empêcher l'accès côté client
             Secure:   false, // À activer en production (HTTPS)
             SameSite: http.SameSiteStrictMode,  // Empêche les attaques CSRF
