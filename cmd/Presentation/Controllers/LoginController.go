@@ -1,7 +1,6 @@
 package Controllers
 
 import (
-    "html/template"
     "net/http"
     "database/sql"
     "time"
@@ -10,14 +9,21 @@ import (
 )
 
 type LoginController struct {
-    templates    *template.Template
+    BaseController
     loginService *Services.LoginService
 }
 
 func NewLoginController(db *sql.DB) *LoginController {
+    // Charger les templates partagés et spécifiques
+    tmpl := Utils.LoadTemplates(
+        "Login/index.html",
+    )
+
     return &LoginController{
-        templates:    Utils.LoadTemplates("Login/index.html"),
-        loginService: Services.NewLoginService(db),
+        BaseController{
+            Templates: tmpl,
+        },
+        Services.NewLoginService(db),
     }
 }
 
@@ -51,16 +57,12 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    data := struct {
-        Title       string
-        ErrorMessage string
-    }{
-        Title:       "login",
-        ErrorMessage: errorMessage,
+    // Préparer les données spécifiques à la vue
+    specificData := map[string]interface{}{
+        "Title":           "Connexion",
+        "ErrorMessage":    errorMessage,
     }
 
-    err := lc.templates.ExecuteTemplate(w, "base", data)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
+    // Utiliser la méthode Render du BaseController
+    lc.Render(w, r, specificData)
 }

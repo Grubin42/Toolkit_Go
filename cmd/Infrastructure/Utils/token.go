@@ -1,6 +1,8 @@
 package Utils
 
 import (
+    "net/http"
+    "strings"
     "github.com/golang-jwt/jwt/v5"
     "time"
     "errors"
@@ -47,4 +49,20 @@ func ValidateJWT(tokenString string) (jwt.MapClaims, error) {
         return nil, errors.New("token invalide ou expiré")
     }
     return claims, nil
+}
+
+// IsAuthenticated vérifie si l'utilisateur est authentifié
+func IsAuthenticated(r *http.Request) bool {
+    cookie, err := r.Cookie("jwt_token")
+    if err != nil {
+        return false
+    }
+
+    token := cookie.Value
+    if strings.TrimSpace(token) == "" {
+        return false
+    }
+
+    _, err = ValidateJWT(token)
+    return err == nil
 }

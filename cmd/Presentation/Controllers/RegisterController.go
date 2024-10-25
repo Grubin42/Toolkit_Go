@@ -1,7 +1,6 @@
 package Controllers
 
 import (
-    "html/template"
     "net/http"
     "database/sql"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Services"
@@ -9,14 +8,19 @@ import (
 )
 
 type RegisterController struct {
-    templates       *template.Template
+    BaseController
     registerService *Services.RegisterService
 }
 
 func NewRegisterController(db *sql.DB) *RegisterController {
+    // Charger les templates partagés et spécifique
     return &RegisterController{
-        templates:       Utils.LoadTemplates("Register/index.html"),
-        registerService: Services.NewRegisterService(db),
+        BaseController{
+            Templates: Utils.LoadTemplates(
+                "Register/index.html",
+            ),
+        },
+        Services.NewRegisterService(db),
     }
 }
 
@@ -41,16 +45,12 @@ func (rc *RegisterController) HandleIndex(w http.ResponseWriter, r *http.Request
         }
     }
 
-    data := struct {
-        Title       string
-        ErrorMessage string
-    }{
-        Title:       "Register",
-        ErrorMessage: errorMessage,  // Passer le message d'erreur à la vue
+    // Préparer les données spécifiques à la vue
+    specificData := map[string]interface{}{
+        "Title":           "Inscription",
+        "ErrorMessage":    errorMessage,
     }
 
-    err := rc.templates.ExecuteTemplate(w, "base", data)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
+    // Utiliser la méthode Render du BaseController
+    rc.Render(w, r, specificData)
 }
