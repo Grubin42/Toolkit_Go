@@ -12,10 +12,6 @@ type LoginService struct {
     db *sql.DB
 }
 
-
-// Clé secrète utilisée pour signer les tokens (doit être sécurisée)
-var jwtSecret = []byte("my_secret_key")
-
 func NewLoginService(db *sql.DB) *LoginService {
     return &LoginService{
         db: db,
