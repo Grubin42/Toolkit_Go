@@ -40,13 +40,15 @@ func (rc *RegisterController) HandleIndex(w http.ResponseWriter, r *http.Request
             return
         }
     }
-
+    isAuthenticated := Utils.IsAuthentificated(r)
     data := struct {
         Title       string
         ErrorMessage string
+        IsAuthenticated bool
     }{
         Title:       "Register",
-        ErrorMessage: errorMessage,  // Passer le message d'erreur à la vue
+        ErrorMessage: errorMessage, // Passer le message d'erreur à la vue
+        IsAuthenticated: isAuthenticated,
     }
 
     err := rc.templates.ExecuteTemplate(w, "base", data)
