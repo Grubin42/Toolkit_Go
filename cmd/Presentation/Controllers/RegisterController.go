@@ -44,23 +44,11 @@ func (rc *RegisterController) HandleIndex(w http.ResponseWriter, r *http.Request
             return
         }
     }
-<<<<<<< HEAD
-    isAuthenticated := Utils.IsAuthentificated(r)
-    data := struct {
-        Title       string
-        ErrorMessage string
-        IsAuthenticated bool
-    }{
-        Title:       "Register",
-        ErrorMessage: errorMessage, // Passer le message d'erreur à la vue
-        IsAuthenticated: isAuthenticated,
-=======
 
     // Préparer les données spécifiques à la vue
     specificData := map[string]interface{}{
         "Title":           "Inscription",
         "ErrorMessage":    errorMessage,
->>>>>>> origin/gael-dev
     }
 
     // Utiliser la méthode Render du BaseController

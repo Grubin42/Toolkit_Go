@@ -1,20 +1,12 @@
 package Utils
 
 import (
-<<<<<<< HEAD:cmd/Infrastructure/Utils/auth.go
-	"errors"
-	"net/http"
-	"time"
-	"github.com/golang-jwt/jwt/v5"
-    "strings"
-=======
     "net/http"
     "strings"
     "github.com/golang-jwt/jwt/v5"
     "time"
     "errors"
     "os"
->>>>>>> origin/gael-dev:cmd/Infrastructure/Utils/token.go
 )
 
 // Clé secrète utilisée pour signer les tokens (doit être sécurisée et stockée dans les variables d'environnement en production)
@@ -44,17 +36,7 @@ func GenerateJWT(userID int) (string, error) {
     }
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-<<<<<<< HEAD:cmd/Infrastructure/Utils/auth.go
-    // Signer le token avec la clé secrète
-    tokenString, err := token.SignedString(jwtSecret)
-    if err != nil {
-        return "", err
-    }
-
-    return tokenString, nil
-=======
     return token.SignedString(getJWTSecret())
->>>>>>> origin/gael-dev:cmd/Infrastructure/Utils/token.go
 }
 
 // ValidateJWT vérifie et valide un token JWT
@@ -69,26 +51,18 @@ func ValidateJWT(tokenString string) (jwt.MapClaims, error) {
     return claims, nil
 }
 
-<<<<<<< HEAD:cmd/Infrastructure/Utils/auth.go
-func IsAuthentificated(r *http.Request) bool {
-=======
 // IsAuthenticated vérifie si l'utilisateur est authentifié
 func IsAuthenticated(r *http.Request) bool {
->>>>>>> origin/gael-dev:cmd/Infrastructure/Utils/token.go
     cookie, err := r.Cookie("jwt_token")
     if err != nil {
         return false
     }
 
     token := cookie.Value
-<<<<<<< HEAD:cmd/Infrastructure/Utils/auth.go
-    return strings.TrimSpace(token) != ""
-=======
     if strings.TrimSpace(token) == "" {
         return false
     }
 
     _, err = ValidateJWT(token)
     return err == nil
->>>>>>> origin/gael-dev:cmd/Infrastructure/Utils/token.go
 }

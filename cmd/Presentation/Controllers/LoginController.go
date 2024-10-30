@@ -30,9 +30,6 @@ func NewLoginController(db *sql.DB) *LoginController {
 func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
     var errorMessage string
 
-    // Vérifier la présence du cookie JWT pour déterminer si l'utilisateur est connecté
-    isAuthenticated := Utils.IsAuthentificated(r)
-    
     if r.Method == http.MethodPost {
         identifier := r.FormValue("username")
         password := r.FormValue("password")
@@ -40,26 +37,19 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         // Appeler le service de connexion pour obtenir le JWT
         status, token, err := lc.loginService.LoginUser(identifier, password)
         if err != nil {
-            http.Error(w, err.Error(), status)
+            w.WriteHeader(status)
+            errorMessage = err.Error()
+            http.Error(w, errorMessage, status)
             return
         }
-
         // Stocker le JWT dans un cookie sécurisé
         http.SetCookie(w, &http.Cookie{
             Name:     "jwt_token",
             Value:    token,
-<<<<<<< HEAD
-            Expires:  time.Now().Add(24 * time.Hour),
-            HttpOnly: true,
-            Secure:   false,
-            Path:     "/",
-            SameSite: http.SameSiteStrictMode,
-=======
             Expires:  time.Now().Add(Utils.GetTokenExpiration()),
             HttpOnly: true, // Pour empêcher l'accès côté client
             Secure:   false, // À activer en production (HTTPS)
             SameSite: http.SameSiteStrictMode,  // Empêche les attaques CSRF
->>>>>>> origin/gael-dev
         })
 
         // Rediriger après une connexion réussie
@@ -67,22 +57,10 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-<<<<<<< HEAD
-    // Passer l'état de connexion à la vue
-    data := struct {
-        Title           string
-        ErrorMessage    string
-        IsAuthenticated bool
-    }{
-        Title:           "Accueil",
-        ErrorMessage:    errorMessage,
-        IsAuthenticated: isAuthenticated,
-=======
     // Préparer les données spécifiques à la vue
     specificData := map[string]interface{}{
         "Title":           "Connexion",
         "ErrorMessage":    errorMessage,
->>>>>>> origin/gael-dev
     }
 
     // Utiliser la méthode Render du BaseController
