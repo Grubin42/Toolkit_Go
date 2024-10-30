@@ -1,22 +1,25 @@
 package Controllers
 
 import (
-    "html/template"
     "net/http"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
 )
 
 type HomeController struct {
-    templates *template.Template
+    BaseController
 }
 
+// NewHomeController initialise un HomeController avec les templates nécessaires
 func NewHomeController() *HomeController {
     return &HomeController{
-        templates: Utils.LoadTemplates("Home/index.html"),
+        BaseController{
+            Templates: Utils.LoadTemplates( "Home/index.html"),
+        },
     }
 }
 
 func (hc *HomeController) HandleIndex(w http.ResponseWriter, r *http.Request) {
+<<<<<<< HEAD
     // Vérifier la présence du cookie JWT pour déterminer si l'utilisateur est connecté
     isAuthenticated := Utils.IsAuthentificated(r)
 
@@ -27,11 +30,15 @@ func (hc *HomeController) HandleIndex(w http.ResponseWriter, r *http.Request) {
     }{
         Title:           "Accueil",
         IsAuthenticated: isAuthenticated,
+=======
+
+    // Préparer les données spécifiques à la vue
+    specificData := map[string]interface{}{
+        "Title": "Accueil",
+        // Ajoutez d'autres données spécifiques si nécessaire
+>>>>>>> origin/gael-dev
     }
 
-    // Exécuter le template 'base.html' en injectant 'Home/index.html'
-    err := hc.templates.ExecuteTemplate(w, "base", data)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
+    // Utiliser la méthode Render du BaseController
+    hc.Render(w, r, specificData)
 }

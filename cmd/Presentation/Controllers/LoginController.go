@@ -1,7 +1,6 @@
 package Controllers
 
 import (
-    "html/template"
     "net/http"
     "database/sql"
     "time"
@@ -10,14 +9,21 @@ import (
 )
 
 type LoginController struct {
-    templates    *template.Template
+    BaseController
     loginService *Services.LoginService
 }
 
 func NewLoginController(db *sql.DB) *LoginController {
+    // Charger les templates partagés et spécifiques
+    tmpl := Utils.LoadTemplates(
+        "Login/index.html",
+    )
+
     return &LoginController{
-        templates:    Utils.LoadTemplates("Login/index.html"),
-        loginService: Services.NewLoginService(db),
+        BaseController{
+            Templates: tmpl,
+        },
+        Services.NewLoginService(db),
     }
 }
 
@@ -42,11 +48,18 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         http.SetCookie(w, &http.Cookie{
             Name:     "jwt_token",
             Value:    token,
+<<<<<<< HEAD
             Expires:  time.Now().Add(24 * time.Hour),
             HttpOnly: true,
             Secure:   false,
             Path:     "/",
             SameSite: http.SameSiteStrictMode,
+=======
+            Expires:  time.Now().Add(Utils.GetTokenExpiration()),
+            HttpOnly: true, // Pour empêcher l'accès côté client
+            Secure:   false, // À activer en production (HTTPS)
+            SameSite: http.SameSiteStrictMode,  // Empêche les attaques CSRF
+>>>>>>> origin/gael-dev
         })
 
         // Rediriger après une connexion réussie
@@ -54,6 +67,7 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+<<<<<<< HEAD
     // Passer l'état de connexion à la vue
     data := struct {
         Title           string
@@ -63,10 +77,14 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         Title:           "Accueil",
         ErrorMessage:    errorMessage,
         IsAuthenticated: isAuthenticated,
+=======
+    // Préparer les données spécifiques à la vue
+    specificData := map[string]interface{}{
+        "Title":           "Connexion",
+        "ErrorMessage":    errorMessage,
+>>>>>>> origin/gael-dev
     }
 
-    err := lc.templates.ExecuteTemplate(w, "base", data)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
+    // Utiliser la méthode Render du BaseController
+    lc.Render(w, r, specificData)
 }

@@ -1,43 +1,43 @@
 package Middleware
 
 import (
-    "context"
+    "time"
     "net/http"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
 )
 
-type key string
-
-const userIDKey key = "userID"
-
 func AuthMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        // Récupérer le cookie contenant le token
         cookie, err := r.Cookie("jwt_token")
         if err != nil {
-            http.Error(w, "Non autorisé", http.StatusUnauthorized)
+            if err == http.ErrNoCookie {
+                http.Redirect(w, r, "/login", http.StatusSeeOther)
+                return
+            }
+            http.Error(w, "Erreur interne du serveur", http.StatusInternalServerError)
             return
         }
 
-        // Valider le token et extraire les claims
-        claims, err := Utils.ValidateJWT(cookie.Value)
+        tokenString := cookie.Value
+        if tokenString == "" {
+            http.Redirect(w, r, "/login", http.StatusSeeOther)
+            return
+        }
+
+        _, err = Utils.ValidateJWT(tokenString)
         if err != nil {
-            http.Error(w, "Non autorisé : "+err.Error(), http.StatusUnauthorized)
+            http.SetCookie(w, &http.Cookie{
+                Name:     "jwt_token",
+                Value:    "",
+                Expires:  time.Unix(0, 0),
+                HttpOnly: true,
+                Secure:   true,
+                Path:     "/",
+            })
+            http.Redirect(w, r, "/login", http.StatusSeeOther)
             return
         }
 
-        // Extraire l'ID de l'utilisateur depuis les claims
-        userID, ok := claims["user_id"].(float64) // JWT stocke les nombres en float64
-        if !ok {
-            http.Error(w, "Token invalide", http.StatusUnauthorized)
-            return
-        }
-
-        // Ajouter l'ID de l'utilisateur dans le contexte de la requête
-        ctx := context.WithValue(r.Context(), userIDKey, int(userID))
-        r = r.WithContext(ctx)
-
-        // Passer à l'étape suivante avec le contexte mis à jour
         next.ServeHTTP(w, r)
     })
 }
