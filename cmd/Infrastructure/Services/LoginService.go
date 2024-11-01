@@ -19,26 +19,20 @@ func NewLoginService(db *sql.DB) *LoginService {
 }
 
 // LoginUser vérifie si l'utilisateur existe et si le mot de passe est correct, puis génère un JWT
-func (ls *LoginService) LoginUser(identifier, password string) (int, string, error) {
+func (ls *LoginService) LoginUser(identifier, password string) (int, int, error) {
     var user Models.User
 
     // Rechercher l'utilisateur par nom d'utilisateur ou email
     err := user.FindByUsernameOrEmail(ls.db, identifier)
     if err != nil {
-        return http.StatusUnauthorized, "", errors.New("identifiant ou mot de passe incorrect")
+        return http.StatusUnauthorized, 0, errors.New("identifiant ou mot de passe incorrect")
     }
 
     // Vérifier le mot de passe
     err = Utils.CheckPassword(user.PasswordHash, password)
     if err != nil {
-        return http.StatusUnauthorized, "", errors.New("identifiant ou mot de passe incorrect")
+        return http.StatusUnauthorized, 0, errors.New("identifiant ou mot de passe incorrect")
     }
 
-    // Générer le token JWT en utilisant l'utilitaire
-    token, err := Utils.GenerateJWT(user.ID)
-    if err != nil {
-        return http.StatusInternalServerError, "", err
-    }
-
-    return http.StatusOK, token, nil
+    return http.StatusOK, user.ID, nil
 }

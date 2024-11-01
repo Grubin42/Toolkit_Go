@@ -6,11 +6,13 @@ import (
     "time"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Services"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
+    "github.com/Grubin42/Toolkit_Go/cmd/Core/Errors"
 )
 
 type LoginController struct {
     BaseController
     loginService *Services.LoginService
+    refreshService *Services.RefreshService
 }
 
 func NewLoginController(db *sql.DB) *LoginController {
@@ -24,6 +26,7 @@ func NewLoginController(db *sql.DB) *LoginController {
             Templates: tmpl,
         },
         Services.NewLoginService(db),
+        Services.NewRefreshService(db),
     }
 }
 
@@ -34,26 +37,70 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         identifier := r.FormValue("username")
         password := r.FormValue("password")
 
-        // Appeler le service de connexion pour obtenir le JWT
-        status, token, err := lc.loginService.LoginUser(identifier, password)
+        // Appeler le service de connexion pour obtenir l'ID de l'utilisateur
+        status, userID, err := lc.loginService.LoginUser(identifier, password)
         if err != nil {
             w.WriteHeader(status)
             errorMessage = err.Error()
-            http.Error(w, errorMessage, status)
+            lc.HandleError(w, r, "Connexion", errorMessage)
             return
         }
-        // Stocker le JWT dans un cookie sécurisé
+
+
+        // Révoquer tous les anciens refresh tokens
+        err = lc.refreshService.RevokeAllRefreshTokens(userID)
+        if err != nil {
+            errorMessage = Errors.ErrorRevokeAllTokens
+            lc.HandleError(w, r, "Connexion", errorMessage)
+            return
+        }
+
+
+        // Générer les tokens
+        accessToken, err := Utils.GenerateAccessToken(userID)
+        if err != nil {
+            errorMessage = Errors.ErrorTokenGeneration
+            lc.HandleError(w, r, "Connexion", errorMessage)
+            return
+        }
+
+        refreshToken, err := Utils.GenerateRefreshToken(userID)
+        if err != nil {
+            errorMessage = Errors.ErrorRefreshTokenGeneration
+            lc.HandleError(w, r, "Connexion", errorMessage)
+            return
+        }
+
+        // Enregistrer le refresh token dans la base de données
+        expiresAt := time.Now().Add(Utils.GetRefreshTokenExpiration())
+        err = lc.refreshService.SaveRefreshToken(userID, refreshToken, expiresAt)
+        if err != nil {
+            errorMessage = Errors.ErrorRefreshTokenSave
+            lc.HandleError(w, r, "Connexion", errorMessage)
+            return
+        }
+        
+        // Stocker les tokens dans des cookies sécurisés
         http.SetCookie(w, &http.Cookie{
             Name:     "jwt_token",
-            Value:    token,
-            Expires:  time.Now().Add(Utils.GetTokenExpiration()),
+            Value:    accessToken,
+            Expires:  time.Now().Add(Utils.GetAccessTokenExpiration()),
             HttpOnly: true, // Pour empêcher l'accès côté client
             Secure:   false, // À activer en production (HTTPS)
             SameSite: http.SameSiteStrictMode,  // Empêche les attaques CSRF
+            Path:     "/",
         })
 
-        // Rediriger après une connexion réussie
-        http.Redirect(w, r, "/", http.StatusSeeOther)
+        http.SetCookie(w, &http.Cookie{
+            Name:     "refresh_token",
+            Value:    refreshToken,
+            Expires:  expiresAt,
+            HttpOnly: true,
+            Secure:   false, // À activer en production (HTTPS)
+            SameSite: http.SameSiteStrictMode,
+            Path:     "/refresh", // Définir un chemin spécifique pour le refresh
+        })
+        w.Header().Set("HX-Redirect", "/")
         return
     }
 

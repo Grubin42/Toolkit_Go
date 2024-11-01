@@ -15,9 +15,7 @@ type RegisterService struct {
 }
 
 func NewRegisterService(db *sql.DB) *RegisterService {
-    return &RegisterService{
-        db: db,
-    }
+    return &RegisterService{db: db}
 }
 
 // RegisterUser enregistre un utilisateur après validation et hachage du mot de passe

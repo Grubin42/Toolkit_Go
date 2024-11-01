@@ -40,7 +40,7 @@ func (rc *RegisterController) HandleIndex(w http.ResponseWriter, r *http.Request
             w.WriteHeader(status)  // Écrire le bon code HTTP
             errorMessage = err.Error()  // Capturer l'erreur pour l'envoyer à la vue
         } else {
-            http.Redirect(w, r, "/login", http.StatusSeeOther)
+            w.Header().Set("HX-Redirect", "/login")
             return
         }
     }

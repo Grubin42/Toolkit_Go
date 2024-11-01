@@ -30,9 +30,28 @@ func (bc *BaseController) Render(w http.ResponseWriter, r *http.Request, specifi
         }
     }
 
+    if Utils.IsHtmxRequest(r) {
+        // Exécuter uniquement le template spécifique (par exemple, "Home/index.html")
+        err := bc.Templates.ExecuteTemplate(w, "content", data)
+        if err != nil {
+            http.Error(w, "Erreur de template", http.StatusInternalServerError)
+        }
+        return
+    }
+    
     // Exécuter le template de base avec les données
     err := bc.Templates.ExecuteTemplate(w, "base", data)
     if err != nil {
         http.Error(w, "Erreur de template", http.StatusInternalServerError)
     }
+}
+
+
+// HandleError gère la redirection avec un message d'erreur
+func (bc *BaseController) HandleError(w http.ResponseWriter, r *http.Request, title string, errorMessage string) {
+    specificData := map[string]interface{}{
+        "Title":        title,
+        "ErrorMessage": errorMessage,
+    }
+    bc.Render(w, r, specificData)
 }

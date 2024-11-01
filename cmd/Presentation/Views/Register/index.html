@@ -9,7 +9,7 @@
     </div>
     {{ end }}
 
-    <form action="/register" method="POST">
+    <form hx-post="/register" hx-target="#content" hx-swap="outerHTML">
         <div>
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
