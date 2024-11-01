@@ -20,7 +20,7 @@ DOCKER_NAME = toolkit_go_dev-app-1
 # Commande de base pour exécuter les migrations
 # Cette variable contient la commande pour exécuter les migrations, en précisant le chemin des migrations
 # et la base de données cible (ici, MySQL sur localhost avec l'utilisateur root et le mot de passe root).
-MIGRATE = /go/bin/migrate -path ./migrations -database "mysql://root:root@tcp(mysql:3306)/mydatabase"
+MIGRATE = /go/bin/migrate -path /app/cmd/Core/migrations -database "mysql://root:root@tcp(mysql:3306)/mydatabase"
 
 %:
 	@:
@@ -82,24 +82,24 @@ rebuild-no-cache-dev:
 # Commande pour appliquer toutes les migrations
 migrate-up:
 	@echo "Applying all up migrations..."
-	@docker exec -it $(DOCKER_NAME) $(MIGRATE) up
+	docker exec -it $(DOCKER_NAME) $(MIGRATE) up
 
 # Commande pour annuler la dernière migration
 migrate-down:
 	@echo "Reverting the last migration..."
-	@docker exec -it $(DOCKER_NAME) $(MIGRATE) down 1
+	docker exec -it $(DOCKER_NAME) $(MIGRATE) down 1
 
 # Commande pour créer une nouvelle migration
 # Cette règle permet de créer une nouvelle migration. Elle demande d'abord à l'utilisateur de saisir un nom pour la migration,
 # puis exécute la commande pour créer un fichier de migration avec ce nom, dans le répertoire './migrations'.
 migrate-new:
 	@read -p "Enter migration name: " name; \
-	@docker exec -it $(DOCKER_NAME) /go/bin/migrate create -ext sql -dir ./migrations -seq $$name
+	docker exec -it $(DOCKER_NAME) /go/bin/migrate create -ext sql -dir /app/cmd/Core/migrations -seq $$name
 
 # Commande pour vérifier le statut des migrations
 # Cette règle affiche la version actuelle des migrations appliquées dans la base de données.
 migrate-status:
 	@echo "Checking migration status..."
-	@docker exec -it $(DOCKER_NAME) $(MIGRATE) version
+	docker exec -it $(DOCKER_NAME) $(MIGRATE) version
 
 .PHONY: all start up down stop rebuild delete rebuild-no-cache up-dev down-dev stop-dev rebuild-dev delete-dev rebuild-no-cache-dev migrate-up migrate-down migrate-new migrate-status

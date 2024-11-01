@@ -2,32 +2,30 @@
 package Controllers
 
 import (
-    "html/template"
     "net/http"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
 )
 
 type AdminController struct {
-    templates *template.Template
+    BaseController
 }
 
 func NewAdminController() *AdminController {
     return &AdminController{
-        templates: Utils.LoadTemplates("Admin/index.html"),
+        BaseController{
+            Templates: Utils.LoadTemplates( "Admin/index.html"),
+        },
     }
 }
 
 func (ac *AdminController) HandleIndex(w http.ResponseWriter, r *http.Request) {
-    data := struct {
-        Title string
-        // Ajoutez d'autres champs si nécessaire
-    }{
-        Title: "Administration",
+
+    // Préparer les données spécifiques à la vue
+    specificData := map[string]interface{}{
+        "Title": "Administration",
+        // Ajoutez d'autres données spécifiques si nécessaire
     }
 
-    // Exécuter le template 'base' avec les données
-    err := ac.templates.ExecuteTemplate(w, "base", data)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
+    // Utiliser la méthode Render du BaseController
+    ac.Render(w, r, specificData)
 }
