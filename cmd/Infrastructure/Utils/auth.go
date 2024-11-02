@@ -9,30 +9,49 @@ import (
     "os"
 )
 
-// Clé secrète utilisée pour signer les tokens (doit être sécurisée et stockée dans les variables d'environnement en production)
-//var tokenExpiration = 24 * time.Hour 
-var tokenExpiration = 20 * time.Second 
+// Durées de validité des tokens
+var (
+    AccessTokenExpiration  = 1 * time.Hour
+    RefreshTokenExpiration = 30 * 24 * time.Hour // 30 jours
+)
 
-// GetTokenExpiration renvoie la durée d'expiration pour les contrôleurs
-func GetTokenExpiration() time.Duration {
-    return tokenExpiration
+// GetAccessTokenExpiration renvoie la durée d'expiration pour les access tokens
+func GetAccessTokenExpiration() time.Duration {
+    return AccessTokenExpiration
+}
+
+// GetRefreshTokenExpiration renvoie la durée d'expiration pour les refresh tokens
+func GetRefreshTokenExpiration() time.Duration {
+    return RefreshTokenExpiration
 }
 
 // jwtSecret retourne la clé secrète pour les JWT en la chargeant depuis les variables d'environnement
 func getJWTSecret() []byte {
     secret := os.Getenv("JWT_SECRET")
     if secret == "" {
-        panic("JWT_SECRET non défini dans les variables d'environnement") // Panique si la clé n'est pas définie
+        panic("JWT_SECRET non défini dans les variables d'environnement")
     }
     return []byte(secret)
 }
 
-// GenerateJWT génère un token JWT pour un utilisateur avec une expiration de 24 heures
-func GenerateJWT(userID int) (string, error) {
-    // Créer les claims du token
+// GenerateAccessToken génère un access token JWT pour un utilisateur avec une expiration de 1 heure
+func GenerateAccessToken(userID int) (string, error) {
     claims := jwt.MapClaims{
         "user_id": userID,
-        "exp":     time.Now().Add(tokenExpiration).Unix(), // Expiration dans 24 heures
+        "exp":     time.Now().Add(AccessTokenExpiration).Unix(),
+        "type":    "access",
+    }
+
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    return token.SignedString(getJWTSecret())
+}
+
+// GenerateRefreshToken génère un refresh token JWT pour un utilisateur avec une expiration de 30 jours
+func GenerateRefreshToken(userID int) (string, error) {
+    claims := jwt.MapClaims{
+        "user_id": userID,
+        "exp":     time.Now().Add(RefreshTokenExpiration).Unix(),
+        "type":    "refresh",
     }
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

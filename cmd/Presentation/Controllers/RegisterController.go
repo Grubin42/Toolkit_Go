@@ -39,7 +39,8 @@ func (rc *RegisterController) HandleIndex(w http.ResponseWriter, r *http.Request
         if err != nil {
             w.WriteHeader(status)  // Écrire le bon code HTTP
             errorMessage = err.Error()  // Capturer l'erreur pour l'envoyer à la vue
-            rc.HandleError(w, r, "Inscription", errorMessage)
+        } else {
+            w.Header().Set("HX-Redirect", "/login")
             return
         }
         if Utils.IsHtmxRequest(r) {

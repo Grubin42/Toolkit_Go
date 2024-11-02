@@ -37,6 +37,7 @@ func (bc *BaseController) Render(w http.ResponseWriter, r *http.Request, specifi
         }
         return
     }
+    
     // Exécuter le template de base avec les données
     err := bc.Templates.ExecuteTemplate(w, "base", data)
     if err != nil {
@@ -44,7 +45,9 @@ func (bc *BaseController) Render(w http.ResponseWriter, r *http.Request, specifi
     }
 }
 
-func (bc BaseController) HandleError(w http.ResponseWriter, r* http.Request, title string, errorMessage string) {
+
+// HandleError gère la redirection avec un message d'erreur
+func (bc *BaseController) HandleError(w http.ResponseWriter, r *http.Request, title string, errorMessage string) {
     specificData := map[string]interface{}{
         "Title":        title,
         "ErrorMessage": errorMessage,

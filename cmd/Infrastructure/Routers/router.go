@@ -25,9 +25,10 @@ func InitRoutes(db *sql.DB) *http.ServeMux {
     adminController := Controllers.NewAdminController()
     registerController := Controllers.NewRegisterController(db)
     loginController := Controllers.NewLoginController(db)
-    logoutController := Controllers.NewLogoutController()
+    logoutController := Controllers.NewLogoutController(db)
+    refreshController := Controllers.NewRefreshController(db)
 
-    // Routes sans logs de débogage
+    // Définir la route "/"
     router.HandleFunc("/", homeController.HandleIndex)
 
     router.HandleFunc("/login", loginController.HandleIndex)
@@ -35,8 +36,9 @@ func InitRoutes(db *sql.DB) *http.ServeMux {
     router.HandleFunc("/register", registerController.HandleIndex)
 
     router.HandleFunc("/logout", logoutController.HandleLogout)
+    router.HandleFunc("/refresh", refreshController.HandleRefresh)
     
-    router.Handle("/admin", Middleware.AuthMiddleware(http.HandlerFunc(adminController.HandleIndex)))
+    router.Handle("/admin", Middleware.AuthMiddleware(db)(http.HandlerFunc(adminController.HandleIndex)))
 
     return router
 }
