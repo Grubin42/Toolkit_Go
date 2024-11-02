@@ -51,10 +51,7 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
             Secure:   false, // À activer en production (HTTPS)
             SameSite: http.SameSiteStrictMode,  // Empêche les attaques CSRF
         })
-
-        // Rediriger après une connexion réussie
-        http.Redirect(w, r, "/", http.StatusSeeOther)
-        return
+        w.Header().Set("HX-Redirect", "/")
     }
 
     // Préparer les données spécifiques à la vue

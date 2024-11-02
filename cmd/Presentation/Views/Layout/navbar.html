@@ -1,19 +1,17 @@
 {{ define "navbar" }}
 <nav class="navbar">
     <div class="navbar-left">
-        <!-- Logo qui redirige vers la page d'accueil -->
-        <a href="/" class="navbar-logo">
+        <a href="/" class="navbar-logo" hx-get="/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
             <img src="/assets/img/logo_topio.png" alt="Logo">
         </a>
     </div>
     <div class="navbar-right">
         {{ if .IsAuthenticated }}
-            <!-- Bouton Logout -->
             <a href="/logout" class="btn">Logout</a>
         {{ else }}
-            <!-- Boutons Login et Register -->
-            <a href="/login" class="btn">Login</a>
-            <a href="/register" class="btn">Register</a>
+            <!-- Boutons Login et Register avec HTMX -->
+            <a href="/login" class="btn" hx-push-url="true" hx-get="/login" hx-target="#content" hx-swap="innerHTML">Login</a>
+            <a href="/register" class="btn" hx-push-url="true" hx-get="/register" hx-target="#content" hx-swap="innerHTML">Register</a>
         {{ end }}
     </div>
 </nav>

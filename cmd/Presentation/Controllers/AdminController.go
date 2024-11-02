@@ -1,4 +1,3 @@
-// cmd/Presentation/Controllers/AdminController.go
 package Controllers
 
 import (

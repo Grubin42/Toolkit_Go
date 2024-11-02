@@ -6,17 +6,18 @@
         <title>{{.Title}}</title>
         <link rel="preload" href="/assets/css/style.css" as="style" onload="this.rel='stylesheet'">
         <noscript><link rel="stylesheet" href="/assets/css/style.css"></noscript>
-    </head>
+        <script src="https://unpkg.com/htmx.org@1.9.2" integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h" crossorigin="anonymous"></script>
+    </head>   
     <body>
         <header>
             <!-- Inclusion de la navbar -->
             {{ template "navbar" . }}
         </header>
 
-        <main>
+        <main id="content">
             {{ template "content" . }}
         </main>
-       
+
         <footer>
             <p>&copy; 2024 Mon Application</p>
         </footer>

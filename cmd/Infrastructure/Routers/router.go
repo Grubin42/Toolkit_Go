@@ -20,19 +20,20 @@ func InitRoutes(db *sql.DB) *http.ServeMux {
     fs := http.FileServer(http.Dir(assetsPath))
     router.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
-    // Initialiser le HomeController
+    // Initialiser les contrôleurs
     homeController := Controllers.NewHomeController()
     adminController := Controllers.NewAdminController()
     registerController := Controllers.NewRegisterController(db)
     loginController := Controllers.NewLoginController(db)
     logoutController := Controllers.NewLogoutController()
 
-
-    // Définir la route "/"
+    // Routes sans logs de débogage
     router.HandleFunc("/", homeController.HandleIndex)
 
-    router.HandleFunc("/register", registerController.HandleIndex)
     router.HandleFunc("/login", loginController.HandleIndex)
+
+    router.HandleFunc("/register", registerController.HandleIndex)
+
     router.HandleFunc("/logout", logoutController.HandleLogout)
     
     router.Handle("/admin", Middleware.AuthMiddleware(http.HandlerFunc(adminController.HandleIndex)))

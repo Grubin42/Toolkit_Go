@@ -8,8 +8,7 @@
         {{ .ErrorMessage }}
     </div>
     {{ end }}
-
-    <form action="/login" method="POST">
+    <form hx-post="/login" hx-target="#content" hx-swap="outerHTML">
         <div>
             <label for="username">Username or Email:</label>
             <input type="text" id="username" name="username" required>
