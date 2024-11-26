@@ -1,0 +1,30 @@
+{{ define "loginForm" }}
+<form hx-post="/login" hx-target="this" hx-swap="outerHTML">
+    <!-- Affichage du message d'erreur général s'il existe -->
+    {{ if .ErrorMessage }}
+    <div class="error-message" style="color: red;">
+        {{ .ErrorMessage }}
+    </div>
+    {{ end }}
+
+    <div>
+        <label for="username">Username or Email:</label>
+        <input type="text" id="username" name="username" required>
+        <!-- Affichage d'une erreur pour le champ username -->
+        {{ if .Errors.username }}
+        <span style="color: red;">{{ .Errors.username }}</span>
+        {{ end }}
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <!-- Affichage d'une erreur pour le champ password -->
+        {{ if .Errors.password }}
+        <span style="color: red;">{{ .Errors.password }}</span>
+        {{ end }}
+    </div>
+    <div>
+        <button type="submit">Login</button>
+    </div>
+</form>
+{{ end }}

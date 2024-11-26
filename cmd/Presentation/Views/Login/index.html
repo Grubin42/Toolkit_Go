@@ -1,33 +1,6 @@
 {{ define "content" }}
 <div class="login-container">
     <h2>Login</h2>
-
-    <!-- Affichage du message d'erreur s'il existe -->
-    {{ if .ErrorMessage }}
-    <div class="error-message" style="color: red;">
-        {{ .ErrorMessage }}
-    </div>
-    {{ end }}
-
-    <!-- Affichage d'un message d'erreur depuis les paramètres d'URL -->
-    {{ if .URL.Query.Get "error" }}
-    <div class="error-message" style="color: red;">
-        {{ .URL.Query.Get "error" }}
-    </div>
-    {{ end }}
-
-    <form hx-post="/login" hx-target="#content" hx-swap="outerHTML">
-        <div>
-            <label for="username">Username or Email:</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div>
-            <button type="submit">Login</button>
-        </div>
-    </form>
+    {{ template "loginForm" . }}
 </div>
 {{ end }}

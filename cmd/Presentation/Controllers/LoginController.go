@@ -19,6 +19,7 @@ func NewLoginController(db *sql.DB) *LoginController {
     // Charger les templates partagés et spécifiques
     tmpl := Utils.LoadTemplates(
         "Login/index.html",
+        "Login/Component/loginForm.html",
     )
 
     return &LoginController{
@@ -31,43 +32,68 @@ func NewLoginController(db *sql.DB) *LoginController {
 }
 
 func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
-    var errorMessage string
+    errors := make(map[string]string)
 
     if r.Method == http.MethodPost {
-        identifier := r.FormValue("username")
-        password := r.FormValue("password")
-
-        // Appeler le service de connexion pour obtenir l'ID de l'utilisateur
-        status, userID, err := lc.loginService.LoginUser(identifier, password)
-        if err != nil {
-            w.WriteHeader(status)
-            errorMessage = err.Error()
-            lc.HandleError(w, r, "Connexion", errorMessage)
+        // Analyse des données du formulaire
+        if err := r.ParseForm(); err != nil {
+            lc.HandleError(w, r, "Connexion", "Erreur lors de la soumission du formulaire.", nil)
             return
         }
 
+        // Récupération des valeurs des champs
+        identifier := r.FormValue("username")
+        password := r.FormValue("password")
+
+        // Validation des champs d'input
+        if identifier == "" {
+            errors["username"] = "Le nom d'utilisateur ou l'email est requis."
+        }
+        if password == "" {
+            errors["password"] = "Le mot de passe est requis."
+        }
+
+        // Si des erreurs d'input existent, les renvoyer avant d'appeler LoginUser
+        if len(errors) > 0 {
+            lc.HandleError(w, r, "Connexion", "", errors)
+            return
+        }
+
+        // Tentative de connexion de l'utilisateur
+        _, userID, err := lc.loginService.LoginUser(identifier, password)
+        if err != nil {
+            // Gestion des erreurs spécifiques à chaque champ
+            if err.Error() == "username_not_found" {
+                errors["username"] = "Ce nom d'utilisateur ou email est incorrect."
+            } else if err.Error() == "incorrect_password" {
+                errors["password"] = "Le mot de passe est incorrect."
+            } else {
+                // Si l'erreur n'est pas spécifiée, on affiche un message général
+                lc.HandleError(w, r, "Connexion", "Échec de la connexion. Veuillez vérifier vos identifiants.", nil)
+                return
+            }
+            // Affiche les erreurs spécifiques au champ
+            lc.HandleError(w, r, "Connexion", "", errors)
+            return
+        }
 
         // Révoquer tous les anciens refresh tokens
         err = lc.refreshService.RevokeAllRefreshTokens(userID)
         if err != nil {
-            errorMessage = Errors.ErrorRevokeAllTokens
-            lc.HandleError(w, r, "Connexion", errorMessage)
+            lc.HandleError(w, r, "Connexion", Errors.ErrorRevokeAllTokens, nil)
             return
         }
-
 
         // Générer les tokens
         accessToken, err := Utils.GenerateAccessToken(userID)
         if err != nil {
-            errorMessage = Errors.ErrorTokenGeneration
-            lc.HandleError(w, r, "Connexion", errorMessage)
+            lc.HandleError(w, r, "Connexion", Errors.ErrorTokenGeneration, nil)
             return
         }
 
         refreshToken, err := Utils.GenerateRefreshToken(userID)
         if err != nil {
-            errorMessage = Errors.ErrorRefreshTokenGeneration
-            lc.HandleError(w, r, "Connexion", errorMessage)
+            lc.HandleError(w, r, "Connexion", Errors.ErrorRefreshTokenGeneration, nil)
             return
         }
 
@@ -75,19 +101,18 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         expiresAt := time.Now().Add(Utils.GetRefreshTokenExpiration())
         err = lc.refreshService.SaveRefreshToken(userID, refreshToken, expiresAt)
         if err != nil {
-            errorMessage = Errors.ErrorRefreshTokenSave
-            lc.HandleError(w, r, "Connexion", errorMessage)
+            lc.HandleError(w, r, "Connexion", Errors.ErrorRefreshTokenSave, nil)
             return
         }
-        
+
         // Stocker les tokens dans des cookies sécurisés
         http.SetCookie(w, &http.Cookie{
             Name:     "jwt_token",
             Value:    accessToken,
             Expires:  time.Now().Add(Utils.GetAccessTokenExpiration()),
-            HttpOnly: true, // Pour empêcher l'accès côté client
+            HttpOnly: true,
             Secure:   false, // À activer en production (HTTPS)
-            SameSite: http.SameSiteStrictMode,  // Empêche les attaques CSRF
+            SameSite: http.SameSiteStrictMode,
             Path:     "/",
         })
 
@@ -98,18 +123,14 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
             HttpOnly: true,
             Secure:   false, // À activer en production (HTTPS)
             SameSite: http.SameSiteStrictMode,
-            Path:     "/refresh", // Définir un chemin spécifique pour le refresh
+            Path:     "/refresh",
         })
+
+        // Rediriger vers la page d'accueil après une connexion réussie
         w.Header().Set("HX-Redirect", "/")
         return
     }
 
-    // Préparer les données spécifiques à la vue
-    specificData := map[string]interface{}{
-        "Title":           "Connexion",
-        "ErrorMessage":    errorMessage,
-    }
-
-    // Utiliser la méthode Render du BaseController
-    lc.Render(w, r, specificData)
+    // Préparer les données spécifiques pour une requête GET sans erreurs
+    lc.HandleError(w, r, "Connexion", "", nil)
 }

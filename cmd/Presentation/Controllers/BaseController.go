@@ -47,10 +47,11 @@ func (bc *BaseController) Render(w http.ResponseWriter, r *http.Request, specifi
 
 
 // HandleError gère la redirection avec un message d'erreur
-func (bc *BaseController) HandleError(w http.ResponseWriter, r *http.Request, title string, errorMessage string) {
+func (bc *BaseController) HandleError(w http.ResponseWriter, r *http.Request, title string, errorMessage string, errors map[string]string) {
     specificData := map[string]interface{}{
         "Title":        title,
-        "ErrorMessage": errorMessage,
+        "ErrorMessage": errorMessage, // Message d'erreur général
+        "Errors":       errors,       // Map des erreurs spécifiques aux champs
     }
     bc.Render(w, r, specificData)
 }
