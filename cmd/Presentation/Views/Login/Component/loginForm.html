@@ -1,5 +1,5 @@
 {{ define "loginForm" }}
-<form hx-post="/login" hx-target="this" hx-swap="outerHTML">
+<form hx-post="/login" hx-target="#login-container" hx-swap="outerHTML">
     <!-- Affichage du message d'erreur général s'il existe -->
     {{ if .ErrorMessage }}
     <div class="error-message" style="color: red;">

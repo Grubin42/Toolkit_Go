@@ -42,11 +42,11 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         }
 
         // Récupération des valeurs des champs
-        identifier := r.FormValue("username")
+        username := r.FormValue("username")
         password := r.FormValue("password")
 
         // Validation des champs d'input
-        if identifier == "" {
+        if username == "" {
             errors["username"] = "Le nom d'utilisateur ou l'email est requis."
         }
         if password == "" {
@@ -60,7 +60,7 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         }
 
         // Tentative de connexion de l'utilisateur
-        _, userID, err := lc.loginService.LoginUser(identifier, password)
+        _, userID, err := lc.loginService.LoginUser(username, password)
         if err != nil {
             // Gestion des erreurs spécifiques à chaque champ
             if err.Error() == "username_not_found" {
