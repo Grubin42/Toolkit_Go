@@ -1,3 +1,4 @@
+// cmd/Presentation/Controllers/LoginController.go
 package Controllers
 
 import (
@@ -14,61 +15,68 @@ type LoginController struct {
 }
 
 func NewLoginController(db *sql.DB) *LoginController {
-    tmpl := Utils.LoadTemplates(
-        "Login/index.html",
-        "Login/Component/loginForm.html",
-    )
 
     return &LoginController{
         BaseController{
-            Templates: tmpl,
+            Templates: Utils.LoadTemplates(
+                "Login/index.html",
+                "Login/Component/loginForm.html",
+            ),
         },
         Services.NewLoginService(db),
     }
 }
 
 func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
-    errorsMap := make(map[string]string)
-
     if r.Method == http.MethodPost {
         if err := r.ParseForm(); err != nil {
-            Utils.WriteError(w, http.StatusBadRequest, "Erreur lors de la soumission du formulaire.", nil)
+            lc.HandleError(w, r, "Connexion", "Erreur lors de la soumission du formulaire.", nil, Errors.ServerError)
             return
         }
 
         username := r.FormValue("username")
         password := r.FormValue("password")
+        fieldErrors := make(map[string]string)
 
         if username == "" {
-            errorsMap["username"] = "Le nom d'utilisateur ou l'email est requis."
+            fieldErrors["username"] = "Le nom d'utilisateur ou l'email est requis."
         }
         if password == "" {
-            errorsMap["password"] = "Le mot de passe est requis."
+            fieldErrors["password"] = "Le mot de passe est requis."
         }
 
-        if len(errorsMap) > 0 {
-            Utils.WriteError(w, http.StatusBadRequest, "Validation des champs échouée.", errorsMap)
+        if len(fieldErrors) > 0 {
+            lc.HandleError(w, r, "Connexion", "Validation des champs échouée.", fieldErrors, Errors.ValidationError)
             return
         }
 
         _, userID, err := lc.loginService.LoginUser(username, password)
         if err != nil {
-            if err.Error() == "username_not_found" {
-                errorsMap["username"] = "Ce nom d'utilisateur ou email est incorrect."
-            } else if err.Error() == "incorrect_password" {
-                errorsMap["password"] = "Le mot de passe est incorrect."
-            } else {
-                Utils.WriteError(w, http.StatusInternalServerError, "Échec de la connexion. Veuillez vérifier vos identifiants.", nil)
+            fieldErrors := make(map[string]string)
+            switch e := err.(type) {
+            case *Errors.AppError:
+                if e.Type == Errors.AuthenticationError {
+                    if e.Message == "username_not_found" {
+                        fieldErrors["username"] = "Ce nom d'utilisateur ou email est incorrect."
+                    } else if e.Message == "incorrect_password" {
+                        fieldErrors["password"] = "Le mot de passe est incorrect."
+                    }
+                    lc.HandleError(w, r, "Connexion", "Validation des champs échouée.", fieldErrors, Errors.ValidationError)
+                    return
+                } else {
+                    lc.HandleError(w, r, "Connexion", e.Message, nil, Errors.ServerError)
+                    return
+                }
+            default:
+                lc.HandleError(w, r, "Connexion", Errors.ErrorLoginFailed, nil, Errors.ServerError)
                 return
             }
-            Utils.WriteError(w, http.StatusBadRequest, "Validation des champs échouée.", errorsMap)
-            return
         }
 
         // Générer les tokens
         accessToken, refreshToken, err := Utils.GenerateTokens(userID)
         if err != nil {
-            Utils.WriteError(w, http.StatusInternalServerError, Errors.ErrorTokenGeneration, nil)
+            lc.HandleError(w, r, "Connexion", Errors.ErrorTokenGeneration, nil, Errors.ServerError)
             return
         }
 
@@ -76,11 +84,11 @@ func (lc *LoginController) HandleIndex(w http.ResponseWriter, r *http.Request) {
         Utils.SetAccessTokenCookie(w, accessToken)
         Utils.SetRefreshTokenCookie(w, refreshToken)
 
-        // Rediriger vers la page d'accueil après une connexion réussie
+        // Rediriger via HTMX
         w.Header().Set("HX-Redirect", "/")
         return
     }
 
     // Préparer les données spécifiques pour une requête GET sans erreurs
-    lc.HandleError(w, r, "Connexion", "", nil)
+    lc.HandleError(w, r, "Connexion", "", nil, Errors.ServerError)
 }

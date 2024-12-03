@@ -7,7 +7,6 @@ import (
     "time"
     "errors"
     "os"
-    "encoding/json"
 )
 
 // Durées de validité des tokens
@@ -158,20 +157,4 @@ func IsAuthenticated(r *http.Request) bool {
 
     _, err = ValidateJWT(token)
     return err == nil
-}
-
-// ErrorResponse struct pour les réponses d'erreur
-type ErrorResponse struct {
-    Message string            `json:"message"`
-    Details map[string]string `json:"details,omitempty"`
-}
-
-// WriteError écrit une réponse d'erreur JSON
-func WriteError(w http.ResponseWriter, status int, message string, details map[string]string) {
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(status)
-    json.NewEncoder(w).Encode(ErrorResponse{
-        Message: message,
-        Details: details,
-    })
 }

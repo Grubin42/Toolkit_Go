@@ -10,6 +10,7 @@ func LoadTemplates(specificViews ...string) *template.Template {
     templatePaths := []string{
         filepath.Join("cmd", "Presentation", "Views", "Layout", "base.html"),
         filepath.Join("cmd", "Presentation", "Views", "Layout", "navbar.html"),
+        filepath.Join("cmd", "Presentation", "Views", "Components", "errorMessage.html"),
     }
 
     for _, view := range specificViews {
