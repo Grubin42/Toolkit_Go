@@ -1,18 +1,12 @@
-// cmd/Infrastructure/Middleware/AuthMiddleware.go
 package Middleware
 
 import (
     "net/http"
-    "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Services"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
     "github.com/Grubin42/Toolkit_Go/cmd/Core/Errors"
-    "time"
-    "database/sql"
 )
 
-func AuthMiddleware(db *sql.DB) func(http.Handler) http.Handler {
-    refreshService := Services.NewRefreshService(db)
-
+func AuthMiddleware() func(http.Handler) http.Handler {
     return func(next http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
             // Récupérer le access token depuis le cookie
@@ -33,11 +27,10 @@ func AuthMiddleware(db *sql.DB) func(http.Handler) http.Handler {
             }
 
             // Valider le access token
-            _ , err = Utils.ValidateJWT(accessToken)
+            claims, err := Utils.ValidateJWT(accessToken)
             if err != nil {
                 // Si le token est expiré, tenter de rafraîchir
-                // Vérifier si l'erreur est due à l'expiration
-                if err.Error() == "token invalide ou expiré" {
+                if err.Error() == "token invalide ou expiré. Veuillez-vous authentifier" && r.URL.Path != "/refresh" {
                     // Récupérer le refresh token
                     refreshCookie, err := r.Cookie("refresh_token")
                     if err != nil || refreshCookie.Value == "" {
@@ -48,32 +41,21 @@ func AuthMiddleware(db *sql.DB) func(http.Handler) http.Handler {
                     refreshToken := refreshCookie.Value
 
                     // Valider le refresh token
-                    userID, err := refreshService.ValidateRefreshToken(refreshToken)
-                    if err != nil {
+                    refreshClaims, err := Utils.ValidateJWT(refreshToken)
+                    if err != nil || refreshClaims["type"] != "refresh" {
                         // Refresh token invalide ou expiré, supprimer les cookies et rediriger vers login
-                        http.SetCookie(w, &http.Cookie{
-                            Name:     "jwt_token",
-                            Value:    "",
-                            Expires:  time.Unix(0, 0),
-                            HttpOnly: true,
-                            Secure:   true,
-                            SameSite: http.SameSiteStrictMode,
-                            Path:     "/",
-                        })
-
-                        http.SetCookie(w, &http.Cookie{
-                            Name:     "refresh_token",
-                            Value:    "",
-                            Expires:  time.Unix(0, 0),
-                            HttpOnly: true,
-                            Secure:   true,
-                            SameSite: http.SameSiteStrictMode,
-                            Path:     "/refresh",
-                        })
+                        Utils.ClearTokenCookies(w)
 
                         http.Redirect(w, r, "/login", http.StatusSeeOther)
                         return
                     }
+
+                    userIDFloat, ok := claims["user_id"].(float64)
+                    if !ok {
+                        http.Error(w, "Invalid token claims", http.StatusBadRequest)
+                        return
+                    }
+                    userID := int(userIDFloat)
 
                     // Générer un nouveau access token
                     newAccessToken, err := Utils.GenerateAccessToken(userID)
@@ -89,41 +71,9 @@ func AuthMiddleware(db *sql.DB) func(http.Handler) http.Handler {
                         return
                     }
 
-                    // Enregistrer le nouveau refresh token dans la base de données
-                    expiresAt := time.Now().Add(Utils.GetRefreshTokenExpiration())
-                    err = refreshService.SaveRefreshToken(userID, newRefreshToken, expiresAt)
-                    if err != nil {
-                        http.Error(w, Errors.ErrorRefreshTokenSave, http.StatusInternalServerError)
-                        return
-                    }
-
-                    // Révoquer l'ancien refresh token
-                    err = refreshService.RevokeRefreshToken(refreshToken)
-                    if err != nil {
-                        http.Error(w, Errors.ErrorRevokeAllTokens, http.StatusInternalServerError)
-                        return
-                    }
-
                     // Mettre à jour les cookies avec les nouveaux tokens
-                    http.SetCookie(w, &http.Cookie{
-                        Name:     "jwt_token",
-                        Value:    newAccessToken,
-                        Expires:  time.Now().Add(Utils.GetAccessTokenExpiration()),
-                        HttpOnly: true,
-                        Secure:   false, // À activer en production
-                        SameSite: http.SameSiteStrictMode,
-                        Path:     "/",
-                    })
-
-                    http.SetCookie(w, &http.Cookie{
-                        Name:     "refresh_token",
-                        Value:    newRefreshToken,
-                        Expires:  expiresAt,
-                        HttpOnly: true,
-                        Secure:   false, // À activer en production
-                        SameSite: http.SameSiteStrictMode,
-                        Path:     "/refresh",
-                    })
+                    Utils.SetAccessTokenCookie(w, newAccessToken)
+                    Utils.SetRefreshTokenCookie(w, newRefreshToken)
 
                     // Continuer avec la requête en injectant le nouveau access token
                 } else {
@@ -131,12 +81,12 @@ func AuthMiddleware(db *sql.DB) func(http.Handler) http.Handler {
                     http.Error(w, "Token invalide", http.StatusUnauthorized)
                     return
                 }
+            } else {
+                // Vous pouvez ajouter les informations de l'utilisateur au contexte si nécessaire
+                // par exemple:
+                // ctx := context.WithValue(r.Context(), "user_id", claims["user_id"])
+                // next.ServeHTTP(w, r.WithContext(ctx))
             }
-
-            // Vous pouvez ajouter les informations de l'utilisateur au contexte si nécessaire
-            // par exemple:
-            // ctx := context.WithValue(r.Context(), "user_id", claims["user_id"])
-            // next.ServeHTTP(w, r.WithContext(ctx))
 
             next.ServeHTTP(w, r)
         })

@@ -1,4 +1,3 @@
-// cmd/Presentation/Controllers/base_controller.go
 package Controllers
 
 import (
