@@ -2,10 +2,9 @@ package Models
 
 import (
     "database/sql"
-    "errors"
-    "log"
     "strings"
-    "github.com/go-sql-driver/mysql" // Import du driver MySQL pour gérer les erreurs spécifiques
+    "github.com/go-sql-driver/mysql"
+    "github.com/Grubin42/Toolkit_Go/cmd/Core/Errors"
 )
 
 type User struct {
@@ -18,15 +17,14 @@ type User struct {
 // Save enregistre l'utilisateur dans la base de données en utilisant des requêtes SQL natives
 func (u *User) Save(db *sql.DB) error {
     if u.Name == "" || u.Email == "" || u.PasswordHash == "" {
-        return errors.New("les informations de l'utilisateur sont incomplètes")
+        return Errors.ErrValidationFailed
     }
 
     // Préparer l'instruction d'insertion
     query := "INSERT INTO users (name, email, passwordhash) VALUES (?, ?, ?)"
     stmt, err := db.Prepare(query)
     if err != nil {
-        log.Printf("Erreur lors de la préparation de la requête : %v", err)
-        return err
+        return Errors.ErrInternalServerError
     }
     defer stmt.Close()
 
@@ -37,11 +35,10 @@ func (u *User) Save(db *sql.DB) error {
         if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
             // Intercepter l'erreur de duplicata et retourner un message clair
             if strings.Contains(mysqlErr.Message, "users.email") {
-                return errors.New("cette adresse email est déjà utilisée")
+                return Errors.ErrEmailAlreadyUsed
             }
         }
-        log.Printf("Erreur lors de l'insertion de l'utilisateur : %v", err)
-        return err
+        return Errors.ErrInternalServerError
     }
 
     return nil
@@ -55,7 +52,7 @@ func (u *User) FindByUsernameOrEmail(db *sql.DB, identifier string) error {
     err := row.Scan(&u.ID, &u.Name, &u.Email, &u.PasswordHash)
     if err != nil {
         if err == sql.ErrNoRows {
-            return errors.New("utilisateur non trouvé")
+            return Errors.ErrUserNotFound
         }
         return err
     }

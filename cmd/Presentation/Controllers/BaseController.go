@@ -3,9 +3,7 @@ package Controllers
 
 import (
     "html/template"
-    "log"
     "net/http"
-    "github.com/Grubin42/Toolkit_Go/cmd/Core/Errors"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
     "github.com/Grubin42/Toolkit_Go/cmd/Core/Models"
 )
@@ -34,12 +32,10 @@ func (bc *BaseController) Render(w http.ResponseWriter, r *http.Request, specifi
     }
 
     if Utils.IsHtmxRequest(r) {
-
         // Exécuter le template spécifique (par exemple, "content")
         err := bc.Templates.ExecuteTemplate(w, "content", data)
         if err != nil {
-            log.Printf("Erreur d'exécution du template 'content' : %v", err)
-            bc.RenderHTMXError(w, "Une erreur est survenue lors du traitement de votre demande.", Errors.ServerError)
+            bc.RenderHTMXError(w, "Une erreur est survenue lors du traitement de votre demande.", http.StatusInternalServerError)
             return
         }
         return
@@ -48,27 +44,24 @@ func (bc *BaseController) Render(w http.ResponseWriter, r *http.Request, specifi
     // Exécuter le template de base avec les données
     err := bc.Templates.ExecuteTemplate(w, "base", data)
     if err != nil {
-        log.Printf("Erreur d'exécution du template 'base' : %v", err)
-        bc.RenderHTMXError(w, "Une erreur est survenue lors du chargement de la page.", Errors.ServerError)
+        bc.RenderHTMXError(w, "Une erreur est survenue lors du chargement de la page.", http.StatusInternalServerError)
     }
 }
 
 // RenderHTMXError rend un fragment HTML contenant un message d'erreur pour HTMX
-func (bc *BaseController) RenderHTMXError(w http.ResponseWriter, message string, errType Errors.ErrorType) {
+func (bc *BaseController) RenderHTMXError(w http.ResponseWriter, message string, statusCode int) {
     errorData := map[string]interface{}{
         "ErrorMessage": message,
-        "ErrorType":    errType,
     }
-    log.Printf("Rendu du template 'errorMessage' avec les données : %+v", errorData)
     err := bc.Templates.ExecuteTemplate(w, "errorMessage", errorData)
     if err != nil {
-        log.Printf("Erreur d'exécution du template 'errorMessage' : %v", err)
         http.Error(w, "Erreur interne du serveur1", http.StatusInternalServerError)
     }
 }
 
 // HandleError gère la redirection avec un message d'erreur via HTMX ou global
-func (bc *BaseController) HandleError(w http.ResponseWriter, r *http.Request, title string, errorMessage string, fieldErrors map[string]string, errType Errors.ErrorType) {
+func (bc *BaseController) HandleError(w http.ResponseWriter, r *http.Request, title string, errorMessage string, fieldErrors map[string]string, statusCode int) {
+    w.WriteHeader(statusCode)
     formErrors := Models.FormErrors{
         ErrorMessage: errorMessage,
         FieldErrors:  fieldErrors,
@@ -78,9 +71,9 @@ func (bc *BaseController) HandleError(w http.ResponseWriter, r *http.Request, ti
         "Title":      title,
         "FormErrors": formErrors,
         "Data": map[string]string{
-            "username": r.FormValue("username"), // Passer les valeurs précédentes si nécessaire
+            "username":         r.FormValue("username"),
+            "email":            r.FormValue("email"),
         },
-        "ErrorType": errType,
     }
 
     bc.Render(w, r, specificData)

@@ -1,6 +1,6 @@
 <!-- cmd/Presentation/Views/Login/Component/loginForm.html -->
 {{ define "loginForm" }}
-<form hx-post="/login" hx-target="#login-container" hx-swap="outerHTML">
+<form hx-post="/login" hx-target="#login-container" hx-swap="outerHTML" hx-trigger="submit" hx-ext="errorResponseSwap">
     <div>
         <label for="username">Username or Email:</label>
         <input type="text" id="username" name="username" required value="{{ .Data.username }}">

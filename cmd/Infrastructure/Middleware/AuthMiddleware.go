@@ -2,6 +2,7 @@ package Middleware
 
 import (
     "net/http"
+    "errors"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
     "github.com/Grubin42/Toolkit_Go/cmd/Core/Errors"
 )
@@ -12,11 +13,11 @@ func AuthMiddleware() func(http.Handler) http.Handler {
             // Récupérer le access token depuis le cookie
             cookie, err := r.Cookie("jwt_token")
             if err != nil {
-                if err == http.ErrNoCookie {
+                if errors.Is(err, http.ErrNoCookie) {
                     http.Redirect(w, r, "/login", http.StatusSeeOther)
                     return
                 }
-                http.Error(w, "Erreur interne du serveur", http.StatusInternalServerError)
+                http.Error(w, Errors.ErrInternalServerError.Error(), http.StatusInternalServerError)
                 return
             }
 
@@ -60,14 +61,14 @@ func AuthMiddleware() func(http.Handler) http.Handler {
                     // Générer un nouveau access token
                     newAccessToken, err := Utils.GenerateAccessToken(userID)
                     if err != nil {
-                        http.Error(w, Errors.ErrorTokenGeneration, http.StatusInternalServerError)
+                        http.Error(w, "La génération de l'access token a échoué", http.StatusInternalServerError)
                         return
                     }
 
                     // Générer un nouveau refresh token pour la rotation
                     newRefreshToken, err := Utils.GenerateRefreshToken(userID)
                     if err != nil {
-                        http.Error(w, Errors.ErrorRefreshTokenGeneration, http.StatusInternalServerError)
+                        http.Error(w, "La génération du refresh token a échoué", http.StatusInternalServerError)
                         return
                     }
 

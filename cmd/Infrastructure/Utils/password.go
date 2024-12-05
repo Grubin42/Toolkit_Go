@@ -1,15 +1,14 @@
 package Utils
 
 import (
+    "github.com/Grubin42/Toolkit_Go/cmd/Core/Errors"
     "golang.org/x/crypto/bcrypt"
-    "log"
 )
 
 // HashPassword génère un hachage sécurisé pour un mot de passe donné
 func HashPassword(password string) (string, error) {
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
     if err != nil {
-        log.Printf("Erreur lors du hachage du mot de passe : %v", err)
         return "", err
     }
     return string(hashedPassword), nil
@@ -19,7 +18,7 @@ func HashPassword(password string) (string, error) {
 func CheckPassword(hashedPassword, password string) error {
     err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
     if err != nil {
-        return err
+        return Errors.ErrInvalidPassword
     }
     return nil
 }

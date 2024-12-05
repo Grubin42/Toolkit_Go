@@ -1,7 +1,7 @@
 package Utils
 
 import (
-    "errors"
+    "github.com/Grubin42/Toolkit_Go/cmd/Core/Errors"
     "regexp"
     "unicode"
 	"strings"
@@ -10,7 +10,7 @@ import (
 // ValidateUsername vérifie que le username a entre 3 et 20 caractères
 func ValidateUsername(username string) error {
     if len(username) < 3 || len(username) > 20 {
-        return errors.New("le nom d'utilisateur doit contenir entre 3 et 20 caractères")
+        return Errors.ErrUsernameInvalidLength
     }
     return nil
 }
@@ -19,34 +19,33 @@ func ValidateUsername(username string) error {
 func ValidateEmail(email string) error {
     emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`)
     if !emailRegex.MatchString(email) {
-        return errors.New("l'adresse email n'est pas valide")
+        return Errors.ErrEmailInvalidFormat
     }
     return nil
 }
 
 // ValidatePassword vérifie que le mot de passe contient au moins 8 caractères,
 // une majuscule, une minuscule, un chiffre, et un caractère spécial
-func ValidatePassword(password string) []string {
-    var errors []string
+func ValidatePassword(password string) []error {
+    var errs []error
 
-    // Vérifier la longueur du mot de passe
     if len(password) < 8 {
-        errors = append(errors, "le mot de passe doit contenir au moins 8 caractères")
+        errs = append(errs, Errors.ErrPasswordTooShort)
     }
     if !containsUppercase(password) {
-        errors = append(errors, "le mot de passe doit contenir au moins une majuscule")
+        errs = append(errs, Errors.ErrPasswordNoUppercase)
     }
     if !containsLowercase(password) {
-        errors = append(errors, "le mot de passe doit contenir au moins une minuscule")
+        errs = append(errs, Errors.ErrPasswordNoLowercase)
     }
     if !containsDigit(password) {
-        errors = append(errors, "le mot de passe doit contenir au moins un chiffre")
+        errs = append(errs, Errors.ErrPasswordNoDigit)
     }
     if !containsSpecialChar(password) {
-        errors = append(errors, "le mot de passe doit contenir au moins un caractère spécial")
+        errs = append(errs, Errors.ErrPasswordNoSpecialChar)
     }
 
-    return errors
+    return errs
 }
 
 // containsUppercase vérifie si une chaîne contient une majuscule

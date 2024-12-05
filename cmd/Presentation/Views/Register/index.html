@@ -1,33 +1,49 @@
 {{ define "content" }}
 <div class="register-container">
-    <h2>Register</h2>
+    <h2>Inscription</h2>
 
-    <!-- Affichage du message d'erreur s'il existe -->
-    {{ if .ErrorMessage }}
+    <!-- Affichage du message d'erreur global s'il existe -->
+    {{ if .FormErrors.ErrorMessage }}
     <div class="error-message" style="color: red;">
-        {{ .ErrorMessage }}
+        {{ .FormErrors.ErrorMessage }}
     </div>
     {{ end }}
 
-    <form hx-post="/register" hx-target="#content" hx-swap="outerHTML">
+    <form hx-post="/register" hx-target="#content" hx-swap="outerHTML" hx-trigger="submit" hx-ext="errorResponseSwap">
         <div>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
+            <label for="username">Nom d'utilisateur :</label>
+            <input type="text" id="username" name="username" required value="{{ .Data.username }}">
+            <!-- Affichage de l'erreur pour le champ username -->
+            {{ if .FormErrors.FieldErrors.username }}
+            <span style="color: red;">{{ .FormErrors.FieldErrors.username }}</span>
+            {{ end }}
         </div>
         <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
+            <label for="email">Email :</label>
+            <input type="email" id="email" name="email" required value="{{ .Data.email }}">
+            <!-- Affichage de l'erreur pour le champ email -->
+            {{ if .FormErrors.FieldErrors.email }}
+            <span style="color: red;">{{ .FormErrors.FieldErrors.email }}</span>
+            {{ end }}
         </div>
         <div>
-            <label for="password">Password:</label>
+            <label for="password">Mot de passe :</label>
             <input type="password" id="password" name="password" required>
+            <!-- Affichage de l'erreur pour le champ password -->
+            {{ if .FormErrors.FieldErrors.password }}
+            <span style="color: red;">{{ .FormErrors.FieldErrors.password }}</span>
+            {{ end }}
         </div>
         <div>
-            <label for="confirm-password">Confirm Password:</label>
+            <label for="confirm-password">Confirmez le mot de passe :</label>
             <input type="password" id="confirm-password" name="confirm_password" required>
+            <!-- Affichage de l'erreur pour le champ confirm_password -->
+            {{ if .FormErrors.FieldErrors.confirm_password }}
+            <span style="color: red;">{{ .FormErrors.FieldErrors.confirm_password }}</span>
+            {{ end }}
         </div>
         <div>
-            <button type="submit">Register</button>
+            <button type="submit">S'inscrire</button>
         </div>
     </form>
 </div>

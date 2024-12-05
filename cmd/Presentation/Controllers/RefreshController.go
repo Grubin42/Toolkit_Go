@@ -2,6 +2,7 @@ package Controllers
 
 import (
     "net/http"
+    "errors"
     "github.com/Grubin42/Toolkit_Go/cmd/Infrastructure/Utils"
     "github.com/Grubin42/Toolkit_Go/cmd/Core/Errors"
 )
@@ -16,11 +17,11 @@ func (rc *RefreshController) HandleRefresh(w http.ResponseWriter, r *http.Reques
     // Récupérer le refresh token depuis le cookie
     cookie, err := r.Cookie("refresh_token")
     if err != nil {
-        if err == http.ErrNoCookie {
+        if errors.Is(err, http.ErrNoCookie) {
             http.Redirect(w, r, "/login?error=refresh_token_manquant", http.StatusSeeOther)
             return
         }
-        http.Error(w, "Erreur interne du serveur", http.StatusInternalServerError)
+        http.Error(w, Errors.ErrInternalServerError.Error(), http.StatusInternalServerError)
         return
     }
 
@@ -49,14 +50,14 @@ func (rc *RefreshController) HandleRefresh(w http.ResponseWriter, r *http.Reques
     // Générer un nouveau access token
     newAccessToken, err := Utils.GenerateAccessToken(userID)
     if err != nil {
-        http.Error(w, Errors.ErrorTokenGeneration, http.StatusInternalServerError)
+        http.Error(w, Errors.ErrTokenGeneration.Error(), http.StatusInternalServerError)
         return
     }
 
     // Générer un nouveau refresh token pour la rotation
     newRefreshToken, err := Utils.GenerateRefreshToken(userID)
     if err != nil {
-        http.Error(w, Errors.ErrorRefreshTokenGeneration, http.StatusInternalServerError)
+        http.Error(w, Errors.ErrRefreshTokenGeneration.Error(), http.StatusInternalServerError)
         return
     }
 

@@ -1,51 +1,28 @@
+// cmd/Core/Errors/errors.go
 package Errors
 
-const (
-    ErrorLoginFailed              = "Échec de la connexion. Veuillez vérifier vos identifiants."
-    ErrorTokenGeneration          = "Erreur lors de la génération du token."
-    ErrorRefreshTokenGeneration   = "Erreur lors de la génération du refresh token."
-    ErrorRefreshTokenSave         = "Erreur lors de l'enregistrement du refresh token."
-    ErrorRevokeAllTokens          = "Erreur lors de la réinitialisation des tokens existants."
+import "errors"
+
+var (
+    ErrUserNotFound             = errors.New("utilisateur non trouvé")
+    ErrInvalidPassword          = errors.New("mot de passe incorrect")
+    ErrValidationFailed         = errors.New("validation des champs échouée")
+    ErrInternalServerError      = errors.New("erreur interne du serveur")
+    ErrInvalidTokenClaims       = errors.New("les revendications du token sont invalides")
+    ErrTokenInvalid             = errors.New("token invalide ou expiré. Veuillez vous authentifier")
+    ErrTokenGeneration          = errors.New("erreur lors de la génération du token")
+    ErrRefreshTokenGeneration   = errors.New("erreur lors de la génération du refresh token")
+    ErrRefreshTokenInvalid      = errors.New("refresh token invalide ou expiré")
+    ErrRefreshTokenMissing      = errors.New("refresh token manquant")
+    ErrAccessTokenMissing       = errors.New("access token manquant")
+    ErrEmailAlreadyUsed         = errors.New("cette adresse email est déjà utilisée")
+    ErrPasswordsDoNotMatch      = errors.New("les mots de passe ne correspondent pas")
+    ErrUsernameInvalidLength    = errors.New("le nom d'utilisateur doit contenir entre 3 et 20 caractères")
+    ErrEmailInvalidFormat       = errors.New("l'adresse email n'est pas valide")
+    ErrPasswordTooShort         = errors.New("le mot de passe doit contenir au moins 8 caractères")
+    ErrPasswordNoUppercase      = errors.New("le mot de passe doit contenir au moins une majuscule")
+    ErrPasswordNoLowercase      = errors.New("le mot de passe doit contenir au moins une minuscule")
+    ErrPasswordNoDigit          = errors.New("le mot de passe doit contenir au moins un chiffre")
+    ErrPasswordNoSpecialChar    = errors.New("le mot de passe doit contenir au moins un caractère spécial")
+    // Ajoutez d'autres erreurs si nécessaire
 )
-// ErrorType représente le type d'erreur
-type ErrorType string
-
-const (
-    ValidationError     ErrorType = "ValidationError"
-    AuthenticationError ErrorType = "AuthenticationError"
-    ServerError         ErrorType = "ServerError"
-)
-
-// AppError structure pour gérer les erreurs avec un type
-type AppError struct {
-    Type    ErrorType
-    Message string
-    Field   string // Utilisé pour les erreurs de validation
-}
-
-func (e *AppError) Error() string {
-    return e.Message
-}
-
-// Fonctions utilitaires pour créer des erreurs spécifiques
-func NewValidationError(field, message string) *AppError {
-    return &AppError{
-        Type:    ValidationError,
-        Message: message,
-        Field:   field,
-    }
-}
-
-func NewAuthenticationError(message string) *AppError {
-    return &AppError{
-        Type:    AuthenticationError,
-        Message: message,
-    }
-}
-
-func NewServerError(message string) *AppError {
-    return &AppError{
-        Type:    ServerError,
-        Message: message,
-    }
-}
