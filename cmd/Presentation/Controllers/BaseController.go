@@ -61,7 +61,7 @@ func (bc *BaseController) RenderHTMXError(w http.ResponseWriter, message string,
 
 // HandleError gère la redirection avec un message d'erreur via HTMX ou global
 func (bc *BaseController) HandleError(w http.ResponseWriter, r *http.Request, title string, errorMessage string, fieldErrors map[string]string, statusCode int) {
-    w.WriteHeader(statusCode)
+    w.WriteHeader(http.StatusOK)
     formErrors := Models.FormErrors{
         ErrorMessage: errorMessage,
         FieldErrors:  fieldErrors,
